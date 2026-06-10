@@ -90,7 +90,6 @@ export function OrderForm() {
     }));
     setRows(validated);
     if (validated.some((r) => r.error)) return;
-    console.log("Order submitted:", rows);
     alert("Order ready! Stripe integration coming soon.");
   }
 
