@@ -87,8 +87,8 @@
   --brand-brown: oklch(0.28 0.05 50);        /* dark brown #3D2B1F */
   --brand-cream: oklch(0.98 0.01 90);        /* warm cream #FDFAF6 */
   --brand-coral: oklch(0.65 0.15 33);        /* coral CTA #E8724A */
-  --brand-pink: oklch(0.88 0.06 355);        /* pastel pink */
-  --brand-mint: oklch(0.88 0.06 165);        /* mint */
+  --brand-pink: oklch(0.88 0.06 355);        /* pastel pink #F2C4CE */
+  --brand-mint: oklch(0.88 0.06 165);        /* mint #B8E0D4 */
   --brand-yellow: oklch(0.93 0.08 90);       /* soft yellow */
 }
 
