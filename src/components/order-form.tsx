@@ -43,11 +43,20 @@ const INCLUDED_FREE = [
   "2 Character parts",
 ] as const;
 
+const OPTIONAL_FREE_ACCESSORIES = [
+  "Silicon tie",
+  "4 Beads",
+  "2 Character parts",
+] as const;
+
+type OptionalAccessory = (typeof OPTIONAL_FREE_ACCESSORIES)[number];
+
 interface KeyringItem {
   letters: string;
   stringColor: string;
   presentBox: boolean;
   extraCharacterParts: boolean;
+  freeAccessories: OptionalAccessory[];
   error: string;
 }
 
@@ -57,6 +66,7 @@ function createItem(): KeyringItem {
     stringColor: "pink",
     presentBox: false,
     extraCharacterParts: false,
+    freeAccessories: [...OPTIONAL_FREE_ACCESSORIES],
     error: "",
   };
 }
@@ -71,15 +81,15 @@ function validateLetters(value: string): string {
 function IncludedFreePanel() {
   return (
     <div
-      className="mb-8 rounded-2xl p-5 text-white"
-      style={{ backgroundColor: "var(--brand-green)" }}
+      className="mb-8 rounded-2xl p-5"
+      style={{ backgroundColor: "var(--brand-yellow)", color: "var(--brand-brown)" }}
     >
-      <p className="mb-3 text-sm font-extrabold tracking-wider uppercase">
+      <p className="mb-3 text-base font-extrabold tracking-wider uppercase">
         Every keyring includes — free
       </p>
       <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
         {INCLUDED_FREE.map((item) => (
-          <li key={item} className="flex items-center gap-2 text-sm">
+          <li key={item} className="flex items-center gap-2 text-base">
             <Check size={16} className="shrink-0" strokeWidth={3} />
             <span>{item}</span>
           </li>
@@ -116,7 +126,7 @@ function KeyringCard({
     <div className="relative rounded-2xl border bg-white p-4 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
         <p
-          className="text-xs font-bold tracking-wider uppercase"
+          className="text-sm font-bold tracking-wider uppercase"
           style={{ color: "var(--brand-brown)" }}
         >
           Keyring {index + 1}
@@ -146,17 +156,17 @@ function KeyringCard({
             className="uppercase"
           />
           {item.error ? (
-            <p id={`error-${index}`} className="mt-1 text-xs text-red-500">
+            <p id={`error-${index}`} className="mt-1 text-sm text-red-500">
               {item.error}
             </p>
           ) : extra > 0 ? (
-            <p className="mt-1 text-xs text-[var(--brand-coral)]">
+            <p className="mt-1 text-sm text-[var(--brand-coral)]">
               {letterCount}/{FREE_LETTERS} · +
               {formatPrice(extra * EXTRA_LETTER_PRICE)}
             </p>
           ) : (
             <p
-              className="mt-1 text-xs"
+              className="mt-1 text-sm"
               style={{ color: "var(--brand-brown)", opacity: 0.5 }}
             >
               {letterCount}/{FREE_LETTERS} letters · free
@@ -190,9 +200,55 @@ function KeyringCard({
         </div>
       </div>
 
-      {/* Extras */}
+      {/* Free accessories opt-out */}
       <div className="mt-4 flex flex-col gap-2">
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
+        <p className="text-sm font-bold tracking-wider uppercase" style={{ color: "var(--brand-brown)" }}>
+          Free accessories included
+        </p>
+        {/* O-ring: required, always included */}
+        <label className="flex items-center gap-2 text-base">
+          <input
+            type="checkbox"
+            checked
+            onChange={() => {}}
+            onClick={(e) => e.preventDefault()}
+            className="size-4 accent-[var(--brand-green)]"
+          />
+          <span style={{ color: "var(--brand-brown)" }}>
+            O-ring key chain{" "}
+            <span className="text-[var(--brand-green)] font-semibold">Free</span>
+          </span>
+        </label>
+        {OPTIONAL_FREE_ACCESSORIES.map((accessory) => {
+          const included = item.freeAccessories.includes(accessory);
+          return (
+            <label key={accessory} className="flex cursor-pointer items-center gap-2 text-base">
+              <input
+                type="checkbox"
+                checked={included}
+                onChange={() => {
+                  const next = included
+                    ? item.freeAccessories.filter((a) => a !== accessory)
+                    : [...item.freeAccessories, accessory];
+                  onChange({ freeAccessories: next });
+                }}
+                className="size-4 accent-[var(--brand-green)]"
+              />
+              <span style={{ color: "var(--brand-brown)" }}>
+                {accessory}{" "}
+                <span className="text-[var(--brand-green)] font-semibold">Free</span>
+              </span>
+            </label>
+          );
+        })}
+      </div>
+
+      {/* Paid add-ons */}
+      <div className="mt-4 flex flex-col gap-2">
+        <p className="text-sm font-bold tracking-wider uppercase" style={{ color: "var(--brand-brown)" }}>
+          Extra Accessories
+        </p>
+        <label className="flex cursor-pointer items-center gap-2 text-base">
           <input
             type="checkbox"
             checked={item.presentBox}
@@ -206,7 +262,7 @@ function KeyringCard({
             </span>
           </span>
         </label>
-        <label className="flex cursor-pointer items-center gap-2 text-sm">
+        <label className="flex cursor-pointer items-center gap-2 text-base">
           <input
             type="checkbox"
             checked={item.extraCharacterParts}
@@ -226,7 +282,7 @@ function KeyringCard({
 
       {/* Per-keyring subtotal */}
       <div
-        className="mt-4 flex justify-between border-t pt-3 text-sm font-bold"
+        className="mt-4 flex justify-between border-t pt-3 text-base font-bold"
         style={{ color: "var(--brand-brown)" }}
       >
         <span>Keyring subtotal</span>
@@ -254,32 +310,53 @@ function OrderSummary({ items }: OrderSummaryProps) {
 
   return (
     <div
-      className="mt-8 rounded-2xl p-5 text-white"
-      style={{ backgroundColor: "var(--brand-green)" }}
+      className="mt-8 rounded-2xl p-5"
+      style={{ backgroundColor: "var(--brand-yellow)", color: "var(--brand-brown)" }}
     >
-      <div className="flex flex-col gap-1 text-sm">
-        {items.map((item, i) => (
-          <div key={i} className="flex justify-between">
-            <span>
-              Keyring {i + 1}
-              {item.letters ? ` (${item.letters})` : ""}
-            </span>
-            <span>{formatPrice(calculateItemTotal(orderItems[i]))}</span>
-          </div>
-        ))}
+      <div className="flex flex-col gap-3 text-base">
+        {items.map((item, i) => {
+          const stringLabel = STRING_COLORS.find((c) => c.value === item.stringColor)?.label ?? item.stringColor;
+          const extraDetails: string[] = [];
+          if (item.presentBox) extraDetails.push("Present Box");
+          if (item.extraCharacterParts) extraDetails.push("Extra Parts ×2");
+          const allFreeAccessories = ["O-ring key chain", ...item.freeAccessories];
+          return (
+            <div key={i}>
+              <div className="flex justify-between">
+                <span>
+                  Keyring {i + 1}
+                  {item.letters ? ` (${item.letters})` : ""}
+                </span>
+                <span>{formatPrice(calculateItemTotal(orderItems[i]))}</span>
+              </div>
+              <div className="mt-0.5 flex flex-col gap-0.5 text-sm" style={{ color: "var(--brand-brown)", opacity: 0.6 }}>
+                {item.letters && (
+                  <span>Letters: {item.letters.replace(/\s/g, "").split("").join(", ")}</span>
+                )}
+                <span>String: {stringLabel}</span>
+                {allFreeAccessories.length > 0 && (
+                  <span>Includes: {allFreeAccessories.join(" / ")}</span>
+                )}
+                {extraDetails.length > 0 && (
+                  <span>Extras: {extraDetails.join(" / ")}</span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <div className="mt-3 flex justify-between border-t border-white/30 pt-3 text-sm">
+      <div className="mt-3 flex justify-between border-t border-[var(--brand-brown)]/20 pt-3 text-base">
         <span>Subtotal</span>
         <span>{formatPrice(subtotal)}</span>
       </div>
-      <div className="mt-1 flex justify-between text-sm">
+      <div className="mt-1 flex justify-between text-base">
         <span>Shipping</span>
         <span>{freeShipping ? "FREE" : formatPrice(shipping)}</span>
       </div>
 
       {!freeShipping ? (
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-white/15 px-3 py-2 text-xs font-semibold">
+        <div className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold" style={{ backgroundColor: "rgba(61,43,31,0.08)" }}>
           <Truck size={16} className="shrink-0" />
           <span>
             Add {remaining} more keyring{remaining > 1 ? "s" : ""} for FREE
@@ -288,7 +365,7 @@ function OrderSummary({ items }: OrderSummaryProps) {
         </div>
       ) : null}
 
-      <div className="mt-3 flex justify-between border-t border-white/30 pt-3 text-lg font-extrabold">
+      <div className="mt-3 flex justify-between border-t border-[var(--brand-brown)]/20 pt-3 text-lg font-extrabold">
         <span>Total</span>
         <span>{formatPrice(total)}</span>
       </div>
@@ -343,6 +420,7 @@ export function OrderForm() {
             letters: it.letters,
             presentBox: it.presentBox,
             extraCharacterParts: it.extraCharacterParts,
+            freeAccessories: it.freeAccessories,
           })),
         }),
       });
@@ -374,7 +452,7 @@ export function OrderForm() {
           >
             Customize Your Keyring
           </h2>
-          <p className="mt-2 text-sm" style={{ color: "var(--brand-brown)" }}>
+          <p className="mt-2 text-base" style={{ color: "var(--brand-brown)" }}>
             {formatPrice(BASE_PRICE)} each · {FREE_LETTERS} letters free · +
             {formatPrice(EXTRA_LETTER_PRICE)} per extra letter
           </p>
@@ -401,7 +479,7 @@ export function OrderForm() {
         {/* Add another keyring */}
         <button
           onClick={addItem}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed py-3 text-sm font-bold transition-colors hover:bg-white/60"
+          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed py-3 text-base font-bold transition-colors hover:bg-white/60"
           style={{
             borderColor: "var(--brand-green)",
             color: "var(--brand-green)",
@@ -418,7 +496,7 @@ export function OrderForm() {
           onClick={handleSubmit}
           disabled={submitting}
           size="lg"
-          className="mt-6 w-full rounded-full text-base font-bold text-white disabled:opacity-60"
+          className="mt-6 w-full rounded-full text-lg font-bold text-white disabled:opacity-60"
           style={{ backgroundColor: "var(--brand-coral)" }}
         >
           {submitting ? "Redirecting to checkout…" : "Proceed to Payment →"}

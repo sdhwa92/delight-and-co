@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[var(--brand-green)]/20 bg-[var(--brand-cream)]/90 backdrop-blur-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-[var(--brand-yellow)]/40 bg-[var(--brand-cream)]/90 backdrop-blur-sm">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <a href="#home" className="flex items-center gap-2">
           <Image
@@ -13,14 +13,14 @@ export function SiteHeader() {
             className="object-contain"
           />
           <span
-            className="hidden text-lg font-extrabold sm:block"
+            className="hidden text-xl font-extrabold sm:block"
             style={{ color: "var(--brand-brown)" }}
           >
             delight &amp; co
           </span>
         </a>
 
-        <nav className="flex items-center gap-6 text-sm font-semibold">
+        <nav className="flex items-center gap-6 text-base font-semibold">
           <a
             href="#home"
             className="transition-colors hover:text-[var(--brand-coral)]"

@@ -17,7 +17,7 @@ export default async function OrderSuccessPage({
         <CheckCircle2
           size={56}
           className="mx-auto mb-6"
-          style={{ color: "var(--brand-green)" }}
+          style={{ color: "var(--brand-coral)" }}
         />
         <h1
           className="text-3xl font-extrabold"
@@ -25,13 +25,13 @@ export default async function OrderSuccessPage({
         >
           Thank you for your order!
         </h1>
-        <p className="mt-3 text-sm" style={{ color: "var(--brand-brown)" }}>
+        <p className="mt-3 text-base" style={{ color: "var(--brand-brown)" }}>
           Your payment was successful. We&apos;ll start handcrafting your
           keyrings and send a confirmation email shortly.
         </p>
         {session_id ? (
           <p
-            className="mt-4 text-xs"
+            className="mt-4 text-sm"
             style={{ color: "var(--brand-brown)", opacity: 0.5 }}
           >
             Order reference: {session_id}
@@ -39,7 +39,7 @@ export default async function OrderSuccessPage({
         ) : null}
         <Link
           href="/"
-          className="mt-8 inline-block rounded-full px-6 py-3 text-sm font-bold text-white"
+          className="mt-8 inline-block rounded-full px-6 py-3 text-base font-bold text-white"
           style={{ backgroundColor: "var(--brand-coral)" }}
         >
           Back to home
