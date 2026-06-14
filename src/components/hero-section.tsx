@@ -3,27 +3,27 @@ export function HeroSection() {
     <section
       id="home"
       className="relative overflow-hidden"
-      style={{ backgroundColor: "var(--brand-green)" }}
+      style={{ backgroundColor: "var(--brand-yellow)" }}
     >
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 py-20 md:flex-row md:gap-16 md:py-28">
         {/* Left: text */}
         <div className="flex flex-1 flex-col items-center gap-6 text-center md:items-start md:text-left">
-          <span className="text-sm font-semibold tracking-widest text-white/80 uppercase">
+          <span className="text-base font-semibold tracking-widest uppercase" style={{ color: "var(--brand-brown)", opacity: 0.7 }}>
             ✦ Handmade with love
           </span>
-          <h1 className="text-4xl leading-tight font-extrabold text-white sm:text-5xl lg:text-6xl">
+          <h1 className="text-4xl leading-tight font-extrabold sm:text-5xl lg:text-6xl" style={{ color: "var(--brand-brown)" }}>
             Your Name,
             <br />
             Your Keyring
           </h1>
-          <p className="max-w-md text-base text-white/85">
+          <p className="max-w-md text-lg" style={{ color: "var(--brand-brown)", opacity: 0.8 }}>
             Custom alphabet keyrings made by hand. Pick your letters, choose
             your string color, and carry a little piece of joy everywhere you
             go.
           </p>
           <a
             href="#order"
-            className="inline-block rounded-full px-8 py-3 text-base font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+            className="inline-block rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: "var(--brand-coral)" }}
           >
             Order Yours →
@@ -33,7 +33,7 @@ export function HeroSection() {
         {/* Right: product image placeholder */}
         <div className="relative flex flex-1 items-center justify-center">
           <div className="relative h-72 w-72 rounded-3xl bg-white/20 sm:h-80 sm:w-80 lg:h-96 lg:w-96 flex items-center justify-center">
-            <span className="text-white/50 text-sm font-medium">Product Photo</span>
+            <span className="text-sm font-medium" style={{ color: "var(--brand-brown)", opacity: 0.4 }}>Product Photo</span>
           </div>
         </div>
       </div>

@@ -53,14 +53,14 @@ export function TestimonialsSection() {
               className="flex flex-col gap-3 rounded-2xl bg-white p-6 shadow-sm"
             >
               <StarRating rating={t.rating} />
-              <p className="text-sm leading-relaxed" style={{ color: "var(--brand-brown)" }}>
+              <p className="text-base leading-relaxed" style={{ color: "var(--brand-brown)" }}>
                 "{t.text}"
               </p>
               <div className="mt-auto pt-2">
-                <p className="text-sm font-bold" style={{ color: "var(--brand-brown)" }}>
+                <p className="text-base font-bold" style={{ color: "var(--brand-brown)" }}>
                   {t.name}
                 </p>
-                <p className="text-xs" style={{ color: "var(--brand-green)" }}>
+                <p className="text-sm" style={{ color: "var(--brand-green)" }}>
                   {t.item}
                 </p>
               </div>

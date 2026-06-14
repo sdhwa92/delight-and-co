@@ -1,0 +1,1 @@
+- [Spawn agents with Sonnet model](feedback_agent_model.md) — always pass model: "sonnet" when spawning agents for this project

@@ -14,10 +14,10 @@ export function SiteFooter() {
           height={56}
           className="object-contain opacity-90"
         />
-        <p className="text-sm font-semibold text-white/80">
+        <p className="text-base font-semibold text-white/80">
           Handmade Gifts for Little Smiles
         </p>
-        <p className="text-xs text-white/50">
+        <p className="text-sm text-white/50">
           © {new Date().getFullYear()} Delight &amp; Co. All rights reserved.
         </p>
       </div>
