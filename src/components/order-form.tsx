@@ -372,7 +372,7 @@ export function OrderForm() {
             className="text-3xl font-extrabold sm:text-4xl"
             style={{ color: "var(--brand-brown)" }}
           >
-            Customize Your Keyring ddddd
+            Customize Your Keyring
           </h2>
           <p className="mt-2 text-sm" style={{ color: "var(--brand-brown)" }}>
             {formatPrice(BASE_PRICE)} each · {FREE_LETTERS} letters free · +
