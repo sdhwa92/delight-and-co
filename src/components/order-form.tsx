@@ -82,7 +82,10 @@ function IncludedFreePanel() {
   return (
     <div
       className="mb-8 rounded-2xl p-5"
-      style={{ backgroundColor: "var(--brand-yellow)", color: "var(--brand-brown)" }}
+      style={{
+        backgroundColor: "var(--brand-yellow)",
+        color: "var(--brand-brown)",
+      }}
     >
       <p className="mb-3 text-base font-extrabold tracking-wider uppercase">
         Every keyring includes — free
@@ -202,7 +205,10 @@ function KeyringCard({
 
       {/* Free accessories opt-out */}
       <div className="mt-4 flex flex-col gap-2">
-        <p className="text-sm font-bold tracking-wider uppercase" style={{ color: "var(--brand-brown)" }}>
+        <p
+          className="text-sm font-bold tracking-wider uppercase"
+          style={{ color: "var(--brand-brown)" }}
+        >
           Free accessories included
         </p>
         {/* O-ring: required, always included */}
@@ -216,13 +222,18 @@ function KeyringCard({
           />
           <span style={{ color: "var(--brand-brown)" }}>
             O-ring key chain{" "}
-            <span className="text-[var(--brand-green)] font-semibold">Free</span>
+            <span className="font-semibold text-[var(--brand-green)]">
+              Free
+            </span>
           </span>
         </label>
         {OPTIONAL_FREE_ACCESSORIES.map((accessory) => {
           const included = item.freeAccessories.includes(accessory);
           return (
-            <label key={accessory} className="flex cursor-pointer items-center gap-2 text-base">
+            <label
+              key={accessory}
+              className="flex cursor-pointer items-center gap-2 text-base"
+            >
               <input
                 type="checkbox"
                 checked={included}
@@ -236,7 +247,9 @@ function KeyringCard({
               />
               <span style={{ color: "var(--brand-brown)" }}>
                 {accessory}{" "}
-                <span className="text-[var(--brand-green)] font-semibold">Free</span>
+                <span className="font-semibold text-[var(--brand-green)]">
+                  Free
+                </span>
               </span>
             </label>
           );
@@ -245,7 +258,10 @@ function KeyringCard({
 
       {/* Paid add-ons */}
       <div className="mt-4 flex flex-col gap-2">
-        <p className="text-sm font-bold tracking-wider uppercase" style={{ color: "var(--brand-brown)" }}>
+        <p
+          className="text-sm font-bold tracking-wider uppercase"
+          style={{ color: "var(--brand-brown)" }}
+        >
           Extra Accessories
         </p>
         <label className="flex cursor-pointer items-center gap-2 text-base">
@@ -311,15 +327,23 @@ function OrderSummary({ items }: OrderSummaryProps) {
   return (
     <div
       className="mt-8 rounded-2xl p-5"
-      style={{ backgroundColor: "var(--brand-yellow)", color: "var(--brand-brown)" }}
+      style={{
+        backgroundColor: "var(--brand-yellow)",
+        color: "var(--brand-brown)",
+      }}
     >
       <div className="flex flex-col gap-3 text-base">
         {items.map((item, i) => {
-          const stringLabel = STRING_COLORS.find((c) => c.value === item.stringColor)?.label ?? item.stringColor;
+          const stringLabel =
+            STRING_COLORS.find((c) => c.value === item.stringColor)?.label ??
+            item.stringColor;
           const extraDetails: string[] = [];
           if (item.presentBox) extraDetails.push("Present Box");
           if (item.extraCharacterParts) extraDetails.push("Extra Parts ×2");
-          const allFreeAccessories = ["O-ring key chain", ...item.freeAccessories];
+          const allFreeAccessories = [
+            "O-ring key chain",
+            ...item.freeAccessories,
+          ];
           return (
             <div key={i}>
               <div className="flex justify-between">
@@ -329,9 +353,15 @@ function OrderSummary({ items }: OrderSummaryProps) {
                 </span>
                 <span>{formatPrice(calculateItemTotal(orderItems[i]))}</span>
               </div>
-              <div className="mt-0.5 flex flex-col gap-0.5 text-sm" style={{ color: "var(--brand-brown)", opacity: 0.6 }}>
+              <div
+                className="mt-0.5 flex flex-col gap-0.5 text-sm"
+                style={{ color: "var(--brand-brown)", opacity: 0.6 }}
+              >
                 {item.letters && (
-                  <span>Letters: {item.letters.replace(/\s/g, "").split("").join(", ")}</span>
+                  <span>
+                    Letters:{" "}
+                    {item.letters.replace(/\s/g, "").split("").join(", ")}
+                  </span>
                 )}
                 <span>String: {stringLabel}</span>
                 {allFreeAccessories.length > 0 && (
@@ -356,7 +386,10 @@ function OrderSummary({ items }: OrderSummaryProps) {
       </div>
 
       {!freeShipping ? (
-        <div className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold" style={{ backgroundColor: "rgba(61,43,31,0.08)" }}>
+        <div
+          className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold"
+          style={{ backgroundColor: "rgba(61,43,31,0.08)" }}
+        >
           <Truck size={16} className="shrink-0" />
           <span>
             Add {remaining} more keyring{remaining > 1 ? "s" : ""} for FREE
@@ -373,8 +406,17 @@ function OrderSummary({ items }: OrderSummaryProps) {
   );
 }
 
+function validateEmail(value: string): string {
+  if (!value.trim()) return "Please enter your email address.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+    return "Please enter a valid email address.";
+  return "";
+}
+
 export function OrderForm() {
   const [items, setItems] = useState<KeyringItem[]>([createItem()]);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
@@ -407,7 +449,9 @@ export function OrderForm() {
       error: validateLetters(item.letters),
     }));
     setItems(validated);
-    if (validated.some((it) => it.error)) return;
+    const emailErr = validateEmail(email);
+    setEmailError(emailErr);
+    if (validated.some((it) => it.error) || emailErr) return;
 
     setSubmitError("");
     setSubmitting(true);
@@ -416,6 +460,7 @@ export function OrderForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          customerEmail: email,
           items: validated.map((it) => ({
             letters: it.letters,
             presentBox: it.presentBox,
@@ -490,6 +535,43 @@ export function OrderForm() {
         </button>
 
         <OrderSummary items={items} />
+
+        {/* Email */}
+        <div className="mt-6 flex flex-col gap-1">
+          <label
+            htmlFor="customer-email"
+            className="text-sm font-bold"
+            style={{ color: "var(--brand-brown)" }}
+          >
+            Email address
+          </label>
+          <Input
+            id="customer-email"
+            type="email"
+            value={email}
+            onChange={(e) => {
+              setEmail(e.target.value);
+              setEmailError("");
+            }}
+            onBlur={() => setEmailError(validateEmail(email))}
+            placeholder="you@example.com"
+            aria-invalid={emailError ? true : undefined}
+            aria-describedby={emailError ? "email-error" : "email-hint"}
+          />
+          {emailError ? (
+            <p id="email-error" className="text-sm text-red-500">
+              {emailError}
+            </p>
+          ) : (
+            <p
+              id="email-hint"
+              className="text-sm"
+              style={{ color: "var(--brand-brown)", opacity: 0.5 }}
+            >
+              We&apos;ll send your order confirmation here.
+            </p>
+          )}
+        </div>
 
         {/* CTA */}
         <Button

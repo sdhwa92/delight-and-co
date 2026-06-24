@@ -35,11 +35,14 @@ function describeItem(item: OrderItem): string {
 }
 
 export async function POST(request: NextRequest) {
-  let body: { items?: CheckoutItem[] };
+  let body: { items?: CheckoutItem[]; customerEmail?: string };
   try {
     body = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body." },
+      { status: 400 },
+    );
   }
 
   if (!Array.isArray(body.items) || body.items.length === 0) {
@@ -80,8 +83,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const origin =
-    process.env.NEXT_PUBLIC_BASE_URL ?? request.nextUrl.origin;
+  const origin = process.env.NEXT_PUBLIC_BASE_URL ?? request.nextUrl.origin;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -90,6 +92,17 @@ export async function POST(request: NextRequest) {
       shipping_address_collection: { allowed_countries: ["AU"] },
       success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/order/cancel`,
+      customer_email:
+        typeof body.customerEmail === "string" ? body.customerEmail : undefined,
+      metadata: {
+        items: JSON.stringify(
+          items.map((item) => ({
+            letters: item.letters,
+            presentBox: item.presentBox ?? false,
+            extraCharacterParts: item.extraCharacterParts ?? false,
+          })),
+        ),
+      },
     });
 
     return NextResponse.json({ url: session.url });
