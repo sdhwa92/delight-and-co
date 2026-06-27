@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 export function HeroSection() {
   return (
     <section
@@ -30,10 +32,16 @@ export function HeroSection() {
           </a>
         </div>
 
-        {/* Right: product image placeholder */}
+        {/* Right: product image */}
         <div className="relative flex flex-1 items-center justify-center">
-          <div className="relative h-72 w-72 rounded-3xl bg-white/20 sm:h-80 sm:w-80 lg:h-96 lg:w-96 flex items-center justify-center">
-            <span className="text-sm font-medium" style={{ color: "var(--brand-brown)", opacity: 0.4 }}>Product Photo</span>
+          <div className="relative h-80 w-80 overflow-hidden rounded-3xl sm:h-96 sm:w-96 lg:h-[480px] lg:w-[480px]">
+            <Image
+              src="/hero-image.JPEG"
+              alt="Delight & Co custom initial keyrings"
+              fill
+              className="object-cover"
+              priority
+            />
           </div>
         </div>
       </div>

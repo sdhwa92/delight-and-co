@@ -4,15 +4,30 @@ import { stripe } from "@/lib/stripe";
 import {
   calculateItemTotal,
   calculateShipping,
+  calculateSubtotal,
   type OrderItem,
 } from "@/lib/pricing";
 
 const CURRENCY = "aud";
 
+const FREE_ACCESSORY_KEYS = ["Silicon tie", "4 Beads", "2 Character parts"] as const;
+
 interface CheckoutItem {
   letters: unknown;
   presentBox?: unknown;
   extraCharacterParts?: unknown;
+  stringColor?: unknown;
+  freeAccessories?: unknown;
+}
+
+interface CustomerDetails {
+  name?: string;
+  email?: string;
+  phone?: string;
+  street?: string;
+  suburb?: string;
+  state?: string;
+  postcode?: string;
 }
 
 function sanitizeItem(raw: CheckoutItem): OrderItem | null {
@@ -34,8 +49,19 @@ function describeItem(item: OrderItem): string {
   return `Custom Keyring — ${item.letters.trim()}${suffix}`;
 }
 
+// Encodes freeAccessories per item as compact pipe-separated 3-bit strings.
+// e.g. two items: "110|011" — bits = [Silicon tie, 4 Beads, 2 Character parts]
+function encodeFreeAccessories(rawItems: CheckoutItem[]): string {
+  return rawItems
+    .map((it) => {
+      const acc = Array.isArray(it.freeAccessories) ? it.freeAccessories : [];
+      return FREE_ACCESSORY_KEYS.map((k) => (acc.includes(k) ? "1" : "0")).join("");
+    })
+    .join("|");
+}
+
 export async function POST(request: NextRequest) {
-  let body: { items?: CheckoutItem[]; customerEmail?: string };
+  let body: { items?: CheckoutItem[]; customerEmail?: string; customerDetails?: CustomerDetails };
   try {
     body = await request.json();
   } catch {
@@ -84,6 +110,7 @@ export async function POST(request: NextRequest) {
   }
 
   const origin = process.env.NEXT_PUBLIC_BASE_URL ?? request.nextUrl.origin;
+  const cd = body.customerDetails;
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -95,6 +122,7 @@ export async function POST(request: NextRequest) {
       customer_email:
         typeof body.customerEmail === "string" ? body.customerEmail : undefined,
       metadata: {
+        // Core order items (letters, extras) — kept small for 500-char limit
         items: JSON.stringify(
           items.map((item) => ({
             letters: item.letters,
@@ -102,6 +130,19 @@ export async function POST(request: NextRequest) {
             extraCharacterParts: item.extraCharacterParts ?? false,
           })),
         ),
+        // String colors: comma-separated per item (e.g. "pink,yellow,purple")
+        stringColors: body.items
+          .map((it) => (typeof it.stringColor === "string" ? it.stringColor : "pink"))
+          .join(","),
+        // Free accessories: compact 3-bit encoding per item (e.g. "111|110")
+        freeAcc: encodeFreeAccessories(body.items),
+        customerName: cd?.name ?? "",
+        customerPhone: cd?.phone ?? "",
+        deliveryAddress: cd
+          ? `${cd.street ?? ""}, ${cd.suburb ?? ""} ${cd.state ?? ""} ${cd.postcode ?? ""}`.trim()
+          : "",
+        subtotalCents: String(calculateSubtotal(items)),
+        shippingCents: String(calculateShipping(items.length)),
       },
     });
 

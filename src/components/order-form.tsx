@@ -1,6 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import {
+  useForm,
+  FormProvider,
+  useFieldArray,
+  useFormContext,
+} from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus, Trash2, Check, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,6 +31,10 @@ import {
   EXTRA_PARTS_PRICE,
   type OrderItem,
 } from "@/lib/pricing";
+import { orderFormSchema, type OrderFormValues } from "@/lib/schemas";
+import { StepIndicator } from "@/components/step-indicator";
+import { CustomerDetailsForm } from "@/components/customer-details-form";
+import { OrderReview } from "@/components/order-review";
 
 const STRING_COLORS = [
   { value: "pink", label: "Pink", hex: "#F2C4CE" },
@@ -49,33 +60,16 @@ const OPTIONAL_FREE_ACCESSORIES = [
   "2 Character parts",
 ] as const;
 
-type OptionalAccessory = (typeof OPTIONAL_FREE_ACCESSORIES)[number];
+const STEP_LABELS = ["Keyring", "Details", "Review"];
 
-interface KeyringItem {
-  letters: string;
-  stringColor: string;
-  presentBox: boolean;
-  extraCharacterParts: boolean;
-  freeAccessories: OptionalAccessory[];
-  error: string;
-}
-
-function createItem(): KeyringItem {
+function createItem(): OrderFormValues["items"][number] {
   return {
     letters: "",
     stringColor: "pink",
     presentBox: false,
     extraCharacterParts: false,
     freeAccessories: [...OPTIONAL_FREE_ACCESSORIES],
-    error: "",
   };
-}
-
-function validateLetters(value: string): string {
-  if (!value.trim()) return "Please enter at least one letter.";
-  if (!/^[A-Z\s]+$/.test(value))
-    return "Only uppercase letters A–Z are allowed.";
-  return "";
 }
 
 function IncludedFreePanel() {
@@ -102,28 +96,30 @@ function IncludedFreePanel() {
   );
 }
 
-interface KeyringCardProps {
-  item: KeyringItem;
-  index: number;
-  canRemove: boolean;
-  onChange: (patch: Partial<KeyringItem>) => void;
-  onLettersChange: (raw: string) => void;
-  onLettersBlur: () => void;
-  onRemove: () => void;
-}
-
 function KeyringCard({
-  item,
   index,
   canRemove,
-  onChange,
-  onLettersChange,
-  onLettersBlur,
   onRemove,
-}: KeyringCardProps) {
-  const letterCount = item.letters.replace(/\s/g, "").length;
+}: {
+  index: number;
+  canRemove: boolean;
+  onRemove: () => void;
+}) {
+  const {
+    register,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useFormContext<OrderFormValues>();
+  const item = watch(`items.${index}`);
+  const letterCount = (item.letters ?? "").replace(/\s/g, "").length;
   const extra = Math.max(0, letterCount - FREE_LETTERS);
-  const subtotal = calculateItemTotal(item);
+  const subtotal = calculateItemTotal({
+    letters: item.letters ?? "",
+    presentBox: item.presentBox,
+    extraCharacterParts: item.extraCharacterParts,
+  });
+  const lettersError = errors.items?.[index]?.letters?.message;
 
   return (
     <div className="relative rounded-2xl border bg-white p-4 shadow-sm">
@@ -134,34 +130,38 @@ function KeyringCard({
         >
           Keyring {index + 1}
         </p>
-        {canRemove ? (
+        {canRemove && (
           <button
+            type="button"
             onClick={onRemove}
             aria-label={`Remove keyring ${index + 1}`}
             className="text-[var(--brand-brown)] opacity-40 transition-opacity hover:opacity-100"
           >
             <Trash2 size={16} />
           </button>
-        ) : null}
+        )}
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
-        {/* Alphabet input + live counter */}
         <div className="flex-1">
           <Input
-            value={item.letters}
-            onChange={(e) => onLettersChange(e.target.value)}
-            onBlur={onLettersBlur}
             placeholder="e.g. EMMA"
             maxLength={20}
-            aria-invalid={item.error ? true : undefined}
-            aria-describedby={item.error ? `error-${index}` : undefined}
+            aria-invalid={lettersError ? true : undefined}
             className="uppercase"
+            {...register(`items.${index}.letters`, {
+              onChange: (e) => {
+                const upper = e.target.value
+                  .toUpperCase()
+                  .replace(/[^A-Z\s]/g, "");
+                setValue(`items.${index}.letters`, upper, {
+                  shouldValidate: false,
+                });
+              },
+            })}
           />
-          {item.error ? (
-            <p id={`error-${index}`} className="mt-1 text-sm text-red-500">
-              {item.error}
-            </p>
+          {lettersError ? (
+            <p className="mt-1 text-sm text-red-500">{lettersError}</p>
           ) : extra > 0 ? (
             <p className="mt-1 text-sm text-[var(--brand-coral)]">
               {letterCount}/{FREE_LETTERS} · +
@@ -177,12 +177,11 @@ function KeyringCard({
           )}
         </div>
 
-        {/* String color select */}
         <div className="w-full sm:w-48">
           <Select
             value={item.stringColor}
             onValueChange={(val) => {
-              if (val !== null) onChange({ stringColor: val });
+              if (val) setValue(`items.${index}.stringColor`, val);
             }}
           >
             <SelectTrigger className="w-full">
@@ -203,7 +202,7 @@ function KeyringCard({
         </div>
       </div>
 
-      {/* Free accessories opt-out */}
+      {/* Free accessories */}
       <div className="mt-4 flex flex-col gap-2">
         <p
           className="text-sm font-bold tracking-wider uppercase"
@@ -211,14 +210,14 @@ function KeyringCard({
         >
           Free accessories included
         </p>
-        {/* O-ring: required, always included */}
         <label className="flex items-center gap-2 text-base">
           <input
             type="checkbox"
             checked
-            onChange={() => {}}
+            readOnly
             onClick={(e) => e.preventDefault()}
             className="size-4 accent-[var(--brand-green)]"
+            suppressHydrationWarning
           />
           <span style={{ color: "var(--brand-brown)" }}>
             O-ring key chain{" "}
@@ -228,7 +227,7 @@ function KeyringCard({
           </span>
         </label>
         {OPTIONAL_FREE_ACCESSORIES.map((accessory) => {
-          const included = item.freeAccessories.includes(accessory);
+          const included = (item.freeAccessories ?? []).includes(accessory);
           return (
             <label
               key={accessory}
@@ -239,11 +238,14 @@ function KeyringCard({
                 checked={included}
                 onChange={() => {
                   const next = included
-                    ? item.freeAccessories.filter((a) => a !== accessory)
-                    : [...item.freeAccessories, accessory];
-                  onChange({ freeAccessories: next });
+                    ? (item.freeAccessories ?? []).filter(
+                        (a) => a !== accessory,
+                      )
+                    : [...(item.freeAccessories ?? []), accessory];
+                  setValue(`items.${index}.freeAccessories`, next);
                 }}
                 className="size-4 accent-[var(--brand-green)]"
+                suppressHydrationWarning
               />
               <span style={{ color: "var(--brand-brown)" }}>
                 {accessory}{" "}
@@ -268,8 +270,11 @@ function KeyringCard({
           <input
             type="checkbox"
             checked={item.presentBox}
-            onChange={(e) => onChange({ presentBox: e.target.checked })}
+            onChange={(e) =>
+              setValue(`items.${index}.presentBox`, e.target.checked)
+            }
             className="size-4 accent-[var(--brand-green)]"
+            suppressHydrationWarning
           />
           <span style={{ color: "var(--brand-brown)" }}>
             Special Present Box{" "}
@@ -283,9 +288,10 @@ function KeyringCard({
             type="checkbox"
             checked={item.extraCharacterParts}
             onChange={(e) =>
-              onChange({ extraCharacterParts: e.target.checked })
+              setValue(`items.${index}.extraCharacterParts`, e.target.checked)
             }
             className="size-4 accent-[var(--brand-green)]"
+            suppressHydrationWarning
           />
           <span style={{ color: "var(--brand-brown)" }}>
             Additional Character Parts ×2{" "}
@@ -296,7 +302,6 @@ function KeyringCard({
         </label>
       </div>
 
-      {/* Per-keyring subtotal */}
       <div
         className="mt-4 flex justify-between border-t pt-3 text-base font-bold"
         style={{ color: "var(--brand-brown)" }}
@@ -308,11 +313,7 @@ function KeyringCard({
   );
 }
 
-interface OrderSummaryProps {
-  items: KeyringItem[];
-}
-
-function OrderSummary({ items }: OrderSummaryProps) {
+export function OrderSummary({ items }: { items: OrderFormValues["items"] }) {
   const orderItems: OrderItem[] = items.map((it) => ({
     letters: it.letters,
     presentBox: it.presentBox,
@@ -342,7 +343,7 @@ function OrderSummary({ items }: OrderSummaryProps) {
           if (item.extraCharacterParts) extraDetails.push("Extra Parts ×2");
           const allFreeAccessories = [
             "O-ring key chain",
-            ...item.freeAccessories,
+            ...(item.freeAccessories ?? []),
           ];
           return (
             <div key={i}>
@@ -385,7 +386,7 @@ function OrderSummary({ items }: OrderSummaryProps) {
         <span>{freeShipping ? "FREE" : formatPrice(shipping)}</span>
       </div>
 
-      {!freeShipping ? (
+      {!freeShipping && (
         <div
           className="mt-3 flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold"
           style={{ backgroundColor: "rgba(61,43,31,0.08)" }}
@@ -396,7 +397,7 @@ function OrderSummary({ items }: OrderSummaryProps) {
             shipping!
           </span>
         </div>
-      ) : null}
+      )}
 
       <div className="mt-3 flex justify-between border-t border-[var(--brand-brown)]/20 pt-3 text-lg font-extrabold">
         <span>Total</span>
@@ -406,53 +407,52 @@ function OrderSummary({ items }: OrderSummaryProps) {
   );
 }
 
-function validateEmail(value: string): string {
-  if (!value.trim()) return "Please enter your email address.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-    return "Please enter a valid email address.";
-  return "";
-}
-
 export function OrderForm() {
-  const [items, setItems] = useState<KeyringItem[]>([createItem()]);
-  const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState("");
+  const [step, setStep] = useState<1 | 2 | 3>(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const sectionRef = useRef<HTMLElement>(null);
 
-  function updateItem(index: number, patch: Partial<KeyringItem>) {
-    setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, ...patch } : item)),
-    );
+  const methods = useForm<OrderFormValues>({
+    resolver: zodResolver(orderFormSchema),
+    defaultValues: {
+      items: [createItem()],
+      details: {
+        name: "",
+        email: "",
+        phone: "",
+        street: "",
+        suburb: "",
+        state: "",
+        postcode: "",
+      },
+    },
+    mode: "onTouched",
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    control: methods.control,
+    name: "items",
+  });
+
+  function scrollToForm() {
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  function handleLettersChange(index: number, raw: string) {
-    const upper = raw.toUpperCase().replace(/[^A-Z\s]/g, "");
-    updateItem(index, { letters: upper, error: "" });
+  async function goToStep(next: 1 | 2 | 3) {
+    if (next === 2) {
+      const ok = await methods.trigger("items");
+      if (!ok) return;
+    }
+    if (next === 3) {
+      const ok = await methods.trigger("details");
+      if (!ok) return;
+    }
+    setStep(next);
+    scrollToForm();
   }
 
-  function handleLettersBlur(index: number) {
-    updateItem(index, { error: validateLetters(items[index].letters) });
-  }
-
-  function addItem() {
-    setItems((prev) => [...prev, createItem()]);
-  }
-
-  function removeItem(index: number) {
-    setItems((prev) => prev.filter((_, i) => i !== index));
-  }
-
-  async function handleSubmit() {
-    const validated = items.map((item) => ({
-      ...item,
-      error: validateLetters(item.letters),
-    }));
-    setItems(validated);
-    const emailErr = validateEmail(email);
-    setEmailError(emailErr);
-    if (validated.some((it) => it.error) || emailErr) return;
-
+  async function handleSubmit(values: OrderFormValues) {
     setSubmitError("");
     setSubmitting(true);
     try {
@@ -460,8 +460,9 @@ export function OrderForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerEmail: email,
-          items: validated.map((it) => ({
+          customerEmail: values.details.email,
+          customerDetails: values.details,
+          items: values.items.map((it) => ({
             letters: it.letters,
             presentBox: it.presentBox,
             extraCharacterParts: it.extraCharacterParts,
@@ -470,9 +471,8 @@ export function OrderForm() {
         }),
       });
       const data = await res.json();
-      if (!res.ok || !data.url) {
+      if (!res.ok || !data.url)
         throw new Error(data.error ?? "Checkout failed.");
-      }
       window.location.href = data.url;
     } catch (err) {
       setSubmitError(
@@ -482,14 +482,16 @@ export function OrderForm() {
     }
   }
 
+  const watchedItems = methods.watch("items");
+
   return (
     <section
       id="order"
+      ref={sectionRef}
       className="py-20"
       style={{ backgroundColor: "var(--brand-cream)" }}
     >
       <div className="mx-auto max-w-2xl px-4">
-        {/* Section heading */}
         <div className="mb-10 text-center">
           <h2
             className="text-3xl font-extrabold sm:text-4xl"
@@ -503,90 +505,119 @@ export function OrderForm() {
           </p>
         </div>
 
-        <IncludedFreePanel />
+        <StepIndicator steps={STEP_LABELS} current={step} />
 
-        {/* Keyring cards */}
-        <div className="flex flex-col gap-4">
-          {items.map((item, i) => (
-            <KeyringCard
-              key={i}
-              item={item}
-              index={i}
-              canRemove={items.length > 1}
-              onChange={(patch) => updateItem(i, patch)}
-              onLettersChange={(raw) => handleLettersChange(i, raw)}
-              onLettersBlur={() => handleLettersBlur(i)}
-              onRemove={() => removeItem(i)}
-            />
-          ))}
-        </div>
-
-        {/* Add another keyring */}
-        <button
-          onClick={addItem}
-          className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed py-3 text-base font-bold transition-colors hover:bg-white/60"
-          style={{
-            borderColor: "var(--brand-green)",
-            color: "var(--brand-green)",
-          }}
-        >
-          <Plus size={18} />
-          Add another keyring
-        </button>
-
-        <OrderSummary items={items} />
-
-        {/* Email */}
-        <div className="mt-6 flex flex-col gap-1">
-          <label
-            htmlFor="customer-email"
-            className="text-sm font-bold"
-            style={{ color: "var(--brand-brown)" }}
+        <FormProvider {...methods}>
+          <div
+            key={step}
+            className="animate-in fade-in slide-in-from-bottom-2 duration-200"
           >
-            Email address
-          </label>
-          <Input
-            id="customer-email"
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-              setEmailError("");
-            }}
-            onBlur={() => setEmailError(validateEmail(email))}
-            placeholder="you@example.com"
-            aria-invalid={emailError ? true : undefined}
-            aria-describedby={emailError ? "email-error" : "email-hint"}
-          />
-          {emailError ? (
-            <p id="email-error" className="text-sm text-red-500">
-              {emailError}
-            </p>
-          ) : (
-            <p
-              id="email-hint"
-              className="text-sm"
-              style={{ color: "var(--brand-brown)", opacity: 0.5 }}
-            >
-              We&apos;ll send your order confirmation here.
-            </p>
-          )}
-        </div>
+            {step === 1 && (
+              <>
+                <IncludedFreePanel />
+                <div className="flex flex-col gap-4">
+                  {fields.map((field, i) => (
+                    <KeyringCard
+                      key={field.id}
+                      index={i}
+                      canRemove={fields.length > 1}
+                      onRemove={() => remove(i)}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => append(createItem())}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed py-3 text-base font-bold transition-colors hover:bg-white/60"
+                  style={{
+                    borderColor: "var(--brand-green)",
+                    color: "var(--brand-green)",
+                  }}
+                >
+                  <Plus size={18} />
+                  Add another keyring
+                </button>
+                <OrderSummary items={watchedItems} />
+                <Button
+                  type="button"
+                  onClick={() => goToStep(2)}
+                  size="lg"
+                  className="mt-6 w-full rounded-full text-lg font-bold text-white"
+                  style={{ backgroundColor: "var(--brand-coral)" }}
+                >
+                  Continue →
+                </Button>
+              </>
+            )}
 
-        {/* CTA */}
-        <Button
-          onClick={handleSubmit}
-          disabled={submitting}
-          size="lg"
-          className="mt-6 w-full rounded-full text-lg font-bold text-white disabled:opacity-60"
-          style={{ backgroundColor: "var(--brand-coral)" }}
-        >
-          {submitting ? "Redirecting to checkout…" : "Proceed to Payment →"}
-        </Button>
+            {step === 2 && (
+              <>
+                <CustomerDetailsForm />
+                <div className="mt-6 flex flex-col gap-3">
+                  <Button
+                    type="button"
+                    onClick={() => goToStep(3)}
+                    size="lg"
+                    className="w-full rounded-full text-lg font-bold text-white"
+                    style={{ backgroundColor: "var(--brand-coral)" }}
+                  >
+                    Review Order →
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => goToStep(1)}
+                    className="text-sm font-semibold underline"
+                    style={{ color: "var(--brand-brown)", opacity: 0.6 }}
+                  >
+                    ← Back
+                  </button>
+                </div>
+              </>
+            )}
 
-        {submitError ? (
-          <p className="mt-3 text-center text-sm text-red-500">{submitError}</p>
-        ) : null}
+            {step === 3 && (
+              <>
+                <OrderReview
+                  onEditItems={() => {
+                    setStep(1);
+                    scrollToForm();
+                  }}
+                  onEditDetails={() => {
+                    setStep(2);
+                    scrollToForm();
+                  }}
+                />
+                <div className="mt-6 flex flex-col gap-3">
+                  <Button
+                    type="button"
+                    onClick={methods.handleSubmit(handleSubmit)}
+                    disabled={submitting}
+                    size="lg"
+                    className="w-full rounded-full text-lg font-bold text-white disabled:opacity-60"
+                    style={{ backgroundColor: "var(--brand-coral)" }}
+                  >
+                    {submitting
+                      ? "Redirecting to checkout…"
+                      : "Proceed to Payment →"}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => goToStep(2)}
+                    className="text-sm font-semibold underline"
+                    style={{ color: "var(--brand-brown)", opacity: 0.6 }}
+                  >
+                    ← Back
+                  </button>
+                </div>
+                {submitError && (
+                  <p className="mt-3 text-center text-sm text-red-500">
+                    {submitError}
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+        </FormProvider>
       </div>
     </section>
   );
