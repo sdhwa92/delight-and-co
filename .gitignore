@@ -42,3 +42,6 @@ next-env.d.ts
 
 # local claude files
 .claude/*.local.*
+
+# plans
+docs/plans

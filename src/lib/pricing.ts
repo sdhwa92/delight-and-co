@@ -2,7 +2,7 @@ export const BASE_PRICE = 1590; // cents: $15.90
 export const FREE_LETTERS = 6;
 export const EXTRA_LETTER_PRICE = 50; // cents: $0.50
 export const SHIPPING_FEE = 990; // cents: $9.90
-export const FREE_SHIPPING_THRESHOLD = 3; // keyrings
+export const FREE_SHIPPING_THRESHOLD = 4; // keyrings
 export const PRESENT_BOX_PRICE = 350; // cents: $3.50
 export const EXTRA_PARTS_PRICE = 100; // cents: $1.00
 
