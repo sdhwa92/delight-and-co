@@ -48,8 +48,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ received: true });
     }
 
-    // Fix 3: prefer confirmed customer email over pre-fill value
+    // Customer info now comes from Stripe Checkout, not the order form
     const customerEmail = session.customer_details?.email ?? session.customer_email;
+    const customerName = session.customer_details?.name ?? "";
+    const customerPhone = session.customer_details?.phone ?? undefined;
+    const addr = session.collected_information?.shipping_details?.address;
+    const deliveryAddress = addr
+      ? [addr.line1, addr.line2, addr.city, addr.state, addr.postal_code]
+          .filter(Boolean)
+          .join(", ")
+      : "";
     const meta = session.metadata ?? {};
 
     if (customerEmail && meta.items) {
@@ -71,9 +79,9 @@ export async function POST(req: NextRequest) {
 
         const ctx = {
           items: emailItems,
-          customerName: meta.customerName ?? "",
-          customerPhone: meta.customerPhone || undefined,
-          deliveryAddress: meta.deliveryAddress ?? "",
+          customerName,
+          customerPhone,
+          deliveryAddress,
         };
 
         await transporter.sendMail({
@@ -91,12 +99,12 @@ export async function POST(req: NextRequest) {
           await transporter.sendMail({
             from: `"Delight & Co" <${process.env.GMAIL_USER}>`,
             to: process.env.OWNER_EMAIL,
-            subject: `New order from ${meta.customerName || customerEmail}`,
+            subject: `New order from ${customerName || customerEmail}`,
             html: buildOwnerNotificationEmail({
-              customer_name: meta.customerName ?? "",
+              customer_name: customerName,
               customer_email: customerEmail,
-              customer_phone: meta.customerPhone || undefined,
-              delivery_address: meta.deliveryAddress ?? "",
+              customer_phone: customerPhone,
+              delivery_address: deliveryAddress,
               items: emailItems,
               total_cents: totalCents,
             }),
