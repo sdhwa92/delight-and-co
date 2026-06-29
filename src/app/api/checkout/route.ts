@@ -20,16 +20,6 @@ interface CheckoutItem {
   freeAccessories?: unknown;
 }
 
-interface CustomerDetails {
-  name?: string;
-  email?: string;
-  phone?: string;
-  street?: string;
-  suburb?: string;
-  state?: string;
-  postcode?: string;
-}
-
 function sanitizeItem(raw: CheckoutItem): OrderItem | null {
   if (typeof raw.letters !== "string") return null;
   const letters = raw.letters.toUpperCase().replace(/[^A-Z\s]/g, "");
@@ -61,7 +51,7 @@ function encodeFreeAccessories(rawItems: CheckoutItem[]): string {
 }
 
 export async function POST(request: NextRequest) {
-  let body: { items?: CheckoutItem[]; customerEmail?: string; customerDetails?: CustomerDetails };
+  let body: { items?: CheckoutItem[] };
   try {
     body = await request.json();
   } catch {
@@ -110,17 +100,15 @@ export async function POST(request: NextRequest) {
   }
 
   const origin = process.env.NEXT_PUBLIC_BASE_URL ?? request.nextUrl.origin;
-  const cd = body.customerDetails;
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items,
       shipping_address_collection: { allowed_countries: ["AU"] },
+      phone_number_collection: { enabled: true },
       success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/order/cancel`,
-      customer_email:
-        typeof body.customerEmail === "string" ? body.customerEmail : undefined,
       metadata: {
         // Core order items (letters, extras) — kept small for 500-char limit
         items: JSON.stringify(
@@ -136,11 +124,6 @@ export async function POST(request: NextRequest) {
           .join(","),
         // Free accessories: compact 3-bit encoding per item (e.g. "111|110")
         freeAcc: encodeFreeAccessories(body.items),
-        customerName: cd?.name ?? "",
-        customerPhone: cd?.phone ?? "",
-        deliveryAddress: cd
-          ? `${cd.street ?? ""}, ${cd.suburb ?? ""} ${cd.state ?? ""} ${cd.postcode ?? ""}`.trim()
-          : "",
         subtotalCents: String(calculateSubtotal(items)),
         shippingCents: String(calculateShipping(items.length)),
       },

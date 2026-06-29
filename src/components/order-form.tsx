@@ -33,7 +33,6 @@ import {
 } from "@/lib/pricing";
 import { orderFormSchema, type OrderFormValues } from "@/lib/schemas";
 import { StepIndicator } from "@/components/step-indicator";
-import { CustomerDetailsForm } from "@/components/customer-details-form";
 import { OrderReview } from "@/components/order-review";
 
 const STRING_COLORS = [
@@ -60,7 +59,7 @@ const OPTIONAL_FREE_ACCESSORIES = [
   "2 Character parts",
 ] as const;
 
-const STEP_LABELS = ["Keyring", "Details", "Review"];
+const STEP_LABELS = ["Keyring", "Review"];
 
 function createItem(): OrderFormValues["items"][number] {
   return {
@@ -408,7 +407,7 @@ export function OrderSummary({ items }: { items: OrderFormValues["items"] }) {
 }
 
 export function OrderForm() {
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<1 | 2>(1);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const sectionRef = useRef<HTMLElement>(null);
@@ -417,15 +416,6 @@ export function OrderForm() {
     resolver: zodResolver(orderFormSchema),
     defaultValues: {
       items: [createItem()],
-      details: {
-        name: "",
-        email: "",
-        phone: "",
-        street: "",
-        suburb: "",
-        state: "",
-        postcode: "",
-      },
     },
     mode: "onTouched",
   });
@@ -439,13 +429,9 @@ export function OrderForm() {
     sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  async function goToStep(next: 1 | 2 | 3) {
+  async function goToStep(next: 1 | 2) {
     if (next === 2) {
       const ok = await methods.trigger("items");
-      if (!ok) return;
-    }
-    if (next === 3) {
-      const ok = await methods.trigger("details");
       if (!ok) return;
     }
     setStep(next);
@@ -460,8 +446,6 @@ export function OrderForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerEmail: values.details.email,
-          customerDetails: values.details,
           items: values.items.map((it) => ({
             letters: it.letters,
             presentBox: it.presentBox,
@@ -552,38 +536,9 @@ export function OrderForm() {
 
             {step === 2 && (
               <>
-                <CustomerDetailsForm />
-                <div className="mt-6 flex flex-col gap-3">
-                  <Button
-                    type="button"
-                    onClick={() => goToStep(3)}
-                    size="lg"
-                    className="w-full rounded-full text-lg font-bold text-white"
-                    style={{ backgroundColor: "var(--brand-coral)" }}
-                  >
-                    Review Order →
-                  </Button>
-                  <button
-                    type="button"
-                    onClick={() => goToStep(1)}
-                    className="text-sm font-semibold underline"
-                    style={{ color: "var(--brand-brown)", opacity: 0.6 }}
-                  >
-                    ← Back
-                  </button>
-                </div>
-              </>
-            )}
-
-            {step === 3 && (
-              <>
                 <OrderReview
                   onEditItems={() => {
                     setStep(1);
-                    scrollToForm();
-                  }}
-                  onEditDetails={() => {
-                    setStep(2);
                     scrollToForm();
                   }}
                 />
@@ -602,7 +557,7 @@ export function OrderForm() {
                   </Button>
                   <button
                     type="button"
-                    onClick={() => goToStep(2)}
+                    onClick={() => goToStep(1)}
                     className="text-sm font-semibold underline"
                     style={{ color: "var(--brand-brown)", opacity: 0.6 }}
                   >

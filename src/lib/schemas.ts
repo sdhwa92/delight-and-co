@@ -25,7 +25,6 @@ export const customerDetailsSchema = z.object({
 
 export const orderFormSchema = z.object({
   items: z.array(keyringItemSchema).min(1),
-  details: customerDetailsSchema,
 });
 
 export type KeyringItemValues = z.infer<typeof keyringItemSchema>;

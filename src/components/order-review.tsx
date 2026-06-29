@@ -17,12 +17,11 @@ const STRING_COLOR_LABELS: Record<string, string> = {
 
 interface OrderReviewProps {
   onEditItems: () => void;
-  onEditDetails: () => void;
 }
 
-export function OrderReview({ onEditItems, onEditDetails }: OrderReviewProps) {
+export function OrderReview({ onEditItems }: OrderReviewProps) {
   const { getValues } = useFormContext<OrderFormValues>();
-  const { items, details } = getValues();
+  const { items } = getValues();
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,38 +80,6 @@ export function OrderReview({ onEditItems, onEditDetails }: OrderReviewProps) {
               </div>
             );
           })}
-        </div>
-      </div>
-
-      {/* Details section */}
-      <div>
-        <div className="mb-3 flex items-center justify-between">
-          <h3
-            className="text-sm font-extrabold tracking-wider uppercase"
-            style={{ color: "var(--brand-brown)" }}
-          >
-            Delivery Details
-          </h3>
-          <button
-            type="button"
-            onClick={onEditDetails}
-            className="text-sm font-semibold underline"
-            style={{ color: "var(--brand-coral)" }}
-          >
-            Edit
-          </button>
-        </div>
-        <div
-          className="rounded-xl border bg-white px-4 py-3 text-sm"
-          style={{ color: "var(--brand-brown)" }}
-        >
-          <p className="font-bold">{details.name}</p>
-          <p style={{ opacity: 0.7 }}>{details.email}</p>
-          {details.phone && <p style={{ opacity: 0.7 }}>{details.phone}</p>}
-          <p className="mt-1" style={{ opacity: 0.7 }}>
-            {details.street}, {details.suburb} {details.state}{" "}
-            {details.postcode}
-          </p>
         </div>
       </div>
 
