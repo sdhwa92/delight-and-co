@@ -51,7 +51,7 @@ function encodeFreeAccessories(rawItems: CheckoutItem[]): string {
 }
 
 export async function POST(request: NextRequest) {
-  let body: { items?: CheckoutItem[] };
+  let body: { items: CheckoutItem[] };
   try {
     body = await request.json();
   } catch {
