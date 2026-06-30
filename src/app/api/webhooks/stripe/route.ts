@@ -81,6 +81,10 @@ export async function POST(req: NextRequest) {
                 customer_phone: customerPhone ?? null,
                 delivery_address: deliveryAddress,
                 paid_at: new Date().toISOString(),
+                // Required for INSERT path (race condition: webhook arrives before checkout INSERT)
+                subtotal_cents: Number(meta.subtotalCents ?? 0),
+                shipping_cents: Number(meta.shippingCents ?? 0),
+                total_cents: Number(meta.subtotalCents ?? 0) + Number(meta.shippingCents ?? 0),
               },
               { onConflict: "id" },
             )
