@@ -1,6 +1,8 @@
+import { randomUUID } from "crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
+import { supabase } from "@/lib/supabase";
 import {
   calculateItemTotal,
   calculateShipping,
@@ -51,7 +53,7 @@ function encodeFreeAccessories(rawItems: CheckoutItem[]): string {
 }
 
 export async function POST(request: NextRequest) {
-  let body: { items?: CheckoutItem[] };
+  let body: { items: CheckoutItem[] };
   try {
     body = await request.json();
   } catch {
@@ -101,10 +103,13 @@ export async function POST(request: NextRequest) {
 
   const origin = process.env.NEXT_PUBLIC_BASE_URL ?? request.nextUrl.origin;
 
+  const orderId = randomUUID();
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
       line_items,
+      client_reference_id: orderId,
       shipping_address_collection: { allowed_countries: ["AU"] },
       phone_number_collection: { enabled: true },
       success_url: `${origin}/order/success?session_id={CHECKOUT_SESSION_ID}`,
@@ -128,6 +133,37 @@ export async function POST(request: NextRequest) {
         shippingCents: String(calculateShipping(items.length)),
       },
     });
+
+    const { error: orderError } = await supabase.from("orders").insert({
+      id: orderId,
+      stripe_session_id: session.id,
+      status: "pending",
+      subtotal_cents: calculateSubtotal(items),
+      shipping_cents: calculateShipping(items.length),
+      total_cents: calculateSubtotal(items) + calculateShipping(items.length),
+    });
+
+    if (!orderError) {
+      const orderItemRows = items.map((it, i) => ({
+        order_id: orderId,
+        product_type: "keyring",
+        quantity: 1,
+        unit_price_cents: calculateItemTotal(it),
+        config: {
+          letters: it.letters,
+          stringColor: body.items[i].stringColor ?? "pink",
+          presentBox: it.presentBox,
+          extraCharacterParts: it.extraCharacterParts,
+          freeAccessories: Array.isArray(body.items[i].freeAccessories)
+            ? body.items[i].freeAccessories
+            : [],
+        },
+      }));
+      const { error: itemsError } = await supabase.from("order_items").insert(orderItemRows);
+      if (itemsError) console.error("Failed to insert order_items:", itemsError);
+    } else {
+      console.error("Failed to insert order:", orderError);
+    }
 
     return NextResponse.json({ url: session.url });
   } catch (err) {
