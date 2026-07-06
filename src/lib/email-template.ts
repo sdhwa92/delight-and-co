@@ -191,7 +191,7 @@ export function buildOrderConfirmationEmail(ctx: EmailContext): string {
 
     <p style="margin:24px 0 0;font-size:0.85rem;color:#6B5040;line-height:1.6;">
       We'll send you a separate email once your order ships.<br/>
-      Questions? Reach us at <a href="mailto:${process.env.GMAIL_USER}" style="color:#C4614A;">${process.env.GMAIL_USER}</a>
+      Questions? Reach us at <a href="mailto:hello@delightandco.com.au" style="color:#C4614A;">hello@delightandco.com.au</a>
     </p>
   `;
 

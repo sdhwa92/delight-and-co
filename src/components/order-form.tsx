@@ -451,6 +451,7 @@ export function OrderForm() {
             presentBox: it.presentBox,
             extraCharacterParts: it.extraCharacterParts,
             freeAccessories: it.freeAccessories,
+            stringColor: it.stringColor,
           })),
         }),
       });

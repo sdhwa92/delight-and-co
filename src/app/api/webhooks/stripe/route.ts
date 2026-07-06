@@ -2,14 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { supabase } from "@/lib/supabase";
-import { transporter } from "@/lib/mailer";
+import { resend, EMAIL_FROM } from "@/lib/mailer";
 import {
   buildOrderConfirmationEmail,
   buildOwnerNotificationEmail,
   type EmailOrderItem,
 } from "@/lib/email-template";
 
-const FREE_ACCESSORY_KEYS = ["Silicon tie", "4 Beads", "2 Character parts"] as const;
+const FREE_ACCESSORY_KEYS = [
+  "Silicon tie",
+  "4 Beads",
+  "2 Character parts",
+] as const;
 
 // Decodes the compact freeAcc metadata string back to per-item arrays.
 // "111|110" → [["Silicon tie","4 Beads","2 Character parts"], ["Silicon tie","4 Beads"]]
@@ -50,7 +54,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Customer info now comes from Stripe Checkout, not the order form
-    const customerEmail = session.customer_details?.email ?? session.customer_email;
+    const customerEmail =
+      session.customer_details?.email ?? session.customer_email;
     const customerName = session.customer_details?.name ?? "";
     const customerPhone = session.customer_details?.phone ?? undefined;
     const addr = session.collected_information?.shipping_details?.address;
@@ -84,7 +89,9 @@ export async function POST(req: NextRequest) {
                 // Required for INSERT path (race condition: webhook arrives before checkout INSERT)
                 subtotal_cents: Number(meta.subtotalCents ?? 0),
                 shipping_cents: Number(meta.shippingCents ?? 0),
-                total_cents: Number(meta.subtotalCents ?? 0) + Number(meta.shippingCents ?? 0),
+                total_cents:
+                  Number(meta.subtotalCents ?? 0) +
+                  Number(meta.shippingCents ?? 0),
               },
               { onConflict: "id" },
             )
@@ -117,11 +124,19 @@ export async function POST(req: NextRequest) {
             .filter((row) => row.product_type === "keyring")
             .map((row) => row.config as EmailOrderItem);
         } else {
-          const rawItems: Array<{ letters: string; presentBox: boolean; extraCharacterParts: boolean }> =
-            JSON.parse(meta.items);
+          const rawItems: Array<{
+            letters: string;
+            presentBox: boolean;
+            extraCharacterParts: boolean;
+          }> = JSON.parse(meta.items);
 
-          const stringColors = meta.stringColors ? meta.stringColors.split(",") : [];
-          const freeAccPerItem = decodeFreeAccessories(meta.freeAcc ?? "", rawItems.length);
+          const stringColors = meta.stringColors
+            ? meta.stringColors.split(",")
+            : [];
+          const freeAccPerItem = decodeFreeAccessories(
+            meta.freeAcc ?? "",
+            rawItems.length,
+          );
 
           emailItems = rawItems.map((it, i) => ({
             letters: it.letters,
@@ -139,31 +154,53 @@ export async function POST(req: NextRequest) {
           deliveryAddress,
         };
 
-        await transporter.sendMail({
-          from: `"Delight & Co" <${process.env.GMAIL_USER}>`,
-          to: customerEmail,
-          subject: "🎁 Your Delight & Co order is confirmed!",
-          html: buildOrderConfirmationEmail(ctx),
-        });
+        const { data: customerEmailData, error: customerEmailError } =
+          await resend.emails.send({
+            from: EMAIL_FROM,
+            to: customerEmail,
+            subject: "🎁 Your Delight & Co order is confirmed!",
+            html: buildOrderConfirmationEmail(ctx),
+          });
+        if (customerEmailError) {
+          console.error(
+            "Failed to send customer confirmation email:",
+            customerEmailError,
+          );
+        } else {
+          console.log(
+            "Customer confirmation email sent:",
+            customerEmailData?.id,
+          );
+        }
 
         if (process.env.OWNER_EMAIL) {
-          const totalCents = meta.subtotalCents && meta.shippingCents
-            ? Number(meta.subtotalCents) + Number(meta.shippingCents)
-            : undefined;
+          const totalCents =
+            meta.subtotalCents && meta.shippingCents
+              ? Number(meta.subtotalCents) + Number(meta.shippingCents)
+              : undefined;
 
-          await transporter.sendMail({
-            from: `"Delight & Co" <${process.env.GMAIL_USER}>`,
-            to: process.env.OWNER_EMAIL,
-            subject: `New order from ${customerName || customerEmail}`,
-            html: buildOwnerNotificationEmail({
-              customer_name: customerName,
-              customer_email: customerEmail,
-              customer_phone: customerPhone,
-              delivery_address: deliveryAddress,
-              items: emailItems,
-              total_cents: totalCents,
-            }),
-          });
+          const { data: ownerEmailData, error: ownerEmailError } =
+            await resend.emails.send({
+              from: EMAIL_FROM,
+              to: process.env.OWNER_EMAIL,
+              subject: `New order from ${customerName || customerEmail}`,
+              html: buildOwnerNotificationEmail({
+                customer_name: customerName,
+                customer_email: customerEmail,
+                customer_phone: customerPhone,
+                delivery_address: deliveryAddress,
+                items: emailItems,
+                total_cents: totalCents,
+              }),
+            });
+          if (ownerEmailError) {
+            console.error(
+              "Failed to send owner notification email:",
+              ownerEmailError,
+            );
+          } else {
+            console.log("Owner notification email sent:", ownerEmailData?.id);
+          }
         }
 
         // Stamp confirmed_at to prevent duplicate emails
