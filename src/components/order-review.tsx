@@ -49,7 +49,7 @@ export function OrderReview({ onEditItems }: OrderReviewProps) {
               STRING_COLOR_LABELS[item.stringColor] ?? item.stringColor;
             const extras: string[] = [];
             if (item.presentBox) extras.push("Present Box");
-            if (item.extraCharacterParts) extras.push("Extra Parts ×2");
+            if (item.extraCharacterParts) extras.push("Extra Charms ×2");
             return (
               <div
                 key={i}

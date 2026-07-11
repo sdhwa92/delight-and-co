@@ -12,11 +12,11 @@ import {
 const FREE_ACCESSORY_KEYS = [
   "Silicon tie",
   "4 Beads",
-  "2 Character parts",
+  "2 Charms",
 ] as const;
 
 // Decodes the compact freeAcc metadata string back to per-item arrays.
-// "111|110" → [["Silicon tie","4 Beads","2 Character parts"], ["Silicon tie","4 Beads"]]
+// "111|110" → [["Silicon tie","4 Beads","2 Charms"], ["Silicon tie","4 Beads"]]
 function decodeFreeAccessories(encoded: string, itemCount: number): string[][] {
   const groups = encoded ? encoded.split("|") : [];
   return Array.from({ length: itemCount }, (_, i) => {
@@ -148,6 +148,7 @@ export async function POST(req: NextRequest) {
         }
 
         const ctx = {
+          orderId: orderId ?? "unknown",
           items: emailItems,
           customerName,
           customerPhone,
@@ -185,6 +186,7 @@ export async function POST(req: NextRequest) {
               to: process.env.OWNER_EMAIL,
               subject: `New order from ${customerName || customerEmail}`,
               html: buildOwnerNotificationEmail({
+                order_id: orderId ?? "unknown",
                 customer_name: customerName,
                 customer_email: customerEmail,
                 customer_phone: customerPhone,
