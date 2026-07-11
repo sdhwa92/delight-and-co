@@ -30,7 +30,11 @@ const cardsVariants = {
   visible: {
     opacity: 1,
     x: 0,
-    transition: { duration: 0.8, ease: "easeOut" as const, staggerChildren: 0.2 },
+    transition: {
+      duration: 0.8,
+      ease: "easeOut" as const,
+      staggerChildren: 0.2,
+    },
   },
 };
 
@@ -61,19 +65,24 @@ const SLOTS = [
   { rotate: 10, x: "42%", y: "-6%", z: 10 },
 ] as const;
 
-const ROTATE_INTERVAL_MS = 2000;
+const ROTATE_INTERVAL_MS = 5000;
 
-function useCyclingOffset(count: number, intervalMs: number) {
+function useCyclingOffset(count: number, intervalMs: number, paused: boolean) {
   const [offset, setOffset] = useState(0);
   useEffect(() => {
-    const id = setInterval(() => setOffset((prev) => (prev + 1) % count), intervalMs);
+    if (paused) return;
+    const id = setInterval(
+      () => setOffset((prev) => (prev + 1) % count),
+      intervalMs,
+    );
     return () => clearInterval(id);
-  }, [count, intervalMs]);
+  }, [count, intervalMs, paused]);
   return offset;
 }
 
 export function HeroSection() {
-  const offset = useCyclingOffset(SLOTS.length, ROTATE_INTERVAL_MS);
+  const [isPaused, setIsPaused] = useState(false);
+  const offset = useCyclingOffset(SLOTS.length, ROTATE_INTERVAL_MS, isPaused);
 
   return (
     <section
@@ -130,7 +139,11 @@ export function HeroSection() {
           className="relative flex items-center justify-center md:w-1/2"
           variants={cardsVariants}
         >
-          <div className="relative h-72 w-56 sm:h-80 sm:w-64 md:h-[380px] md:w-[300px]">
+          <div
+            className="relative h-72 w-56 sm:h-80 sm:w-64 md:h-[380px] md:w-[300px]"
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+          >
             {HERO_PHOTOS.map((photo, i) => {
               const slot = SLOTS[(i + offset) % SLOTS.length];
               return (
@@ -141,7 +154,10 @@ export function HeroSection() {
                     style={{ zIndex: slot.z }}
                   >
                     {/* Entrance fade-in, driven by the parent's stagger */}
-                    <motion.div variants={cardItemVariants} className="h-full w-full">
+                    <motion.div
+                      variants={cardItemVariants}
+                      className="h-full w-full"
+                    >
                       {/* Ongoing slot-position cycling */}
                       <motion.div
                         animate={{ rotate: slot.rotate, x: slot.x, y: slot.y }}
