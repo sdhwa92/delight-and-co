@@ -5,6 +5,7 @@ import { useState } from "react";
 
 const INSTAGRAM_URL = "https://www.instagram.com/i_delight_co/";
 const CONTACT_EMAIL = "hello@delightandco.com.au";
+const DEVELOPER_EMAIL = "info@elevateflow.com.au";
 
 function InstagramIcon() {
   return (
@@ -135,7 +136,13 @@ export function SiteFooter() {
       <div className="py-4" style={{ backgroundColor: "var(--brand-brown)" }}>
         <p className="text-center text-sm text-white/50">
           © {new Date().getFullYear() + " "} Delight &amp; Co. All rights
-          reserved.
+          reserved.{" "}
+          <a
+            href={`mailto:${DEVELOPER_EMAIL}`}
+            className="text-white hover:underline"
+          >
+            Site by Elevate Flow.
+          </a>
         </p>
       </div>
     </footer>
