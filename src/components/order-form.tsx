@@ -8,7 +8,8 @@ import {
   useFormContext,
 } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, Trash2, Check, Truck } from "lucide-react";
+import Image from "next/image";
+import { Plus, Trash2, Check, Truck, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,6 +19,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   calculateItemTotal,
   calculateSubtotal,
@@ -80,9 +88,33 @@ function IncludedFreePanel() {
         color: "var(--brand-brown)",
       }}
     >
-      <p className="mb-3 text-base font-extrabold tracking-wider uppercase">
-        Every keyring includes — free
-      </p>
+      <div className="mb-3 flex items-center gap-2">
+        <p className="text-base font-extrabold tracking-wider uppercase">
+          Every keyring includes — free
+        </p>
+        <Dialog>
+          <DialogTrigger
+            className="inline-flex cursor-pointer items-center gap-1 text-xs font-semibold underline-offset-2 hover:underline"
+            aria-label="See what each keyring part looks like"
+          >
+            <Info size={14} />
+            See what&apos;s included
+          </DialogTrigger>
+          <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>What's included</DialogTitle>
+            </DialogHeader>
+            <div className="relative aspect-[896/1196] w-full overflow-hidden rounded-xl">
+              <Image
+                src="/keyring-components.png"
+                alt="Labeled photo of a keyring's parts: string, silicon tie, o-ring, letters, beads, and charms"
+                fill
+                className="object-cover"
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      </div>
       <ul className="grid grid-cols-1 gap-x-6 gap-y-2 sm:grid-cols-2">
         {INCLUDED_FREE.map((item) => (
           <li key={item} className="flex items-center gap-2 text-base">
