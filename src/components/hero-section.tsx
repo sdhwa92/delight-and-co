@@ -5,7 +5,7 @@ export function HeroSection() {
     <section
       id="home"
       className="relative overflow-hidden"
-      style={{ backgroundColor: "var(--brand-yellow)" }}
+      style={{ backgroundColor: "var(--brand-pink)" }}
     >
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 py-20 md:flex-row md:gap-16 md:py-28">
         {/* Left: text */}
@@ -25,7 +25,7 @@ export function HeroSection() {
           </p>
           <a
             href="#order"
-            className="inline-block rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+            className="inline-block cursor-pointer rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: "var(--brand-coral)" }}
           >
             Order Yours →

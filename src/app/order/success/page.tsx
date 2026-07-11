@@ -75,7 +75,7 @@ export default async function OrderSuccessPage({
           <div
             className="mt-6 rounded-2xl p-5 text-left"
             style={{
-              backgroundColor: "var(--brand-yellow)",
+              backgroundColor: "var(--brand-pink)",
               color: "var(--brand-brown)",
             }}
           >
