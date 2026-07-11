@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -23,13 +24,13 @@ export function HeroSection() {
             your string color, and carry a little piece of joy everywhere you
             go.
           </p>
-          <a
-            href="#order"
+          <Link
+            href="/order"
             className="inline-block cursor-pointer rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: "var(--brand-coral)" }}
           >
             Order Yours →
-          </a>
+          </Link>
         </div>
 
         {/* Right: product image */}
