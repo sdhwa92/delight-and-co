@@ -28,7 +28,9 @@ function InstagramIcon() {
 
 function NewsletterForm() {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const [message, setMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -53,7 +55,10 @@ function NewsletterForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-2">
+    <form
+      onSubmit={handleSubmit}
+      className="flex w-full max-w-sm flex-col gap-2"
+    >
       <div className="flex w-full flex-col gap-2 sm:flex-row">
         <input
           type="email"
@@ -76,7 +81,9 @@ function NewsletterForm() {
       {message && (
         <p
           className="text-xs"
-          style={{ color: status === "error" ? "#c0392b" : "var(--brand-brown)" }}
+          style={{
+            color: status === "error" ? "#c0392b" : "var(--brand-brown)",
+          }}
         >
           {message}
         </p>
@@ -90,7 +97,10 @@ export function SiteFooter() {
     <footer>
       <div
         className="py-10"
-        style={{ backgroundColor: "var(--brand-gray)", color: "var(--brand-brown)" }}
+        style={{
+          backgroundColor: "var(--brand-gray)",
+          color: "var(--brand-brown)",
+        }}
       >
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-5 px-4 text-center">
           <Image
@@ -100,7 +110,9 @@ export function SiteFooter() {
             height={56}
             className="object-contain"
           />
-          <p className="text-base font-semibold">Handmade Gifts for Little Smiles</p>
+          <p className="text-base font-semibold">
+            Handmade Gifts for Little Smiles
+          </p>
 
           <a
             href={INSTAGRAM_URL}
@@ -122,7 +134,8 @@ export function SiteFooter() {
 
       <div className="py-4" style={{ backgroundColor: "var(--brand-brown)" }}>
         <p className="text-center text-sm text-white/50">
-          © {new Date().getFullYear()} Delight &amp; Co. All rights reserved.
+          © {new Date().getFullYear() + " "} Delight &amp; Co. All rights
+          reserved.
         </p>
       </div>
     </footer>
