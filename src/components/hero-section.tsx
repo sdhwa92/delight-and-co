@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -42,21 +43,38 @@ const HERO_PHOTOS = [
   {
     src: "/hero-keyring-1.png",
     alt: "Custom keyring spelling PHILIP on a navy backpack",
-    className: "z-0 -translate-x-[42%] -translate-y-[6%] rotate-[-10deg]",
   },
   {
     src: "/hero-keyring-2.png",
     alt: "Custom keyring spelling ZARA on a pink backpack",
-    className: "z-20",
   },
   {
     src: "/hero-keyring-3.png",
     alt: "Custom keyring spelling ARIA on a black handbag",
-    className: "z-10 translate-x-[42%] -translate-y-[6%] rotate-[10deg]",
   },
 ] as const;
 
+// Visual slots the photos rotate through: back-left, front-center, back-right.
+const SLOTS = [
+  { rotate: -10, x: "-42%", y: "-6%", z: 0 },
+  { rotate: 0, x: "0%", y: "0%", z: 20 },
+  { rotate: 10, x: "42%", y: "-6%", z: 10 },
+] as const;
+
+const ROTATE_INTERVAL_MS = 2000;
+
+function useCyclingOffset(count: number, intervalMs: number) {
+  const [offset, setOffset] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setOffset((prev) => (prev + 1) % count), intervalMs);
+    return () => clearInterval(id);
+  }, [count, intervalMs]);
+  return offset;
+}
+
 export function HeroSection() {
+  const offset = useCyclingOffset(SLOTS.length, ROTATE_INTERVAL_MS);
+
   return (
     <section
       id="home"
@@ -113,41 +131,54 @@ export function HeroSection() {
           variants={cardsVariants}
         >
           <div className="relative h-72 w-56 sm:h-80 sm:w-64 md:h-[380px] md:w-[300px]">
-            {HERO_PHOTOS.map((photo) => (
-              <Dialog key={photo.src}>
-                <DialogTrigger
-                  aria-label={`View larger photo: ${photo.alt}`}
-                  className={`absolute inset-0 cursor-pointer appearance-none border-0 bg-transparent p-0 ${photo.className}`}
-                >
-                  <motion.div
-                    variants={cardItemVariants}
-                    whileHover={{ y: -10, transition: { duration: 0.3 } }}
-                    className="relative h-full w-full overflow-hidden rounded-2xl shadow-2xl"
+            {HERO_PHOTOS.map((photo, i) => {
+              const slot = SLOTS[(i + offset) % SLOTS.length];
+              return (
+                <Dialog key={photo.src}>
+                  <DialogTrigger
+                    aria-label={`View larger photo: ${photo.alt}`}
+                    className="absolute inset-0 cursor-pointer appearance-none border-0 bg-transparent p-0"
+                    style={{ zIndex: slot.z }}
                   >
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      fill
-                      className="object-cover"
-                      priority={photo.src === "/hero-keyring-2.png"}
-                    />
-                  </motion.div>
-                </DialogTrigger>
-                <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-                  <DialogHeader>
-                    <DialogTitle className="sr-only">{photo.alt}</DialogTitle>
-                  </DialogHeader>
-                  <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </DialogContent>
-              </Dialog>
-            ))}
+                    {/* Entrance fade-in, driven by the parent's stagger */}
+                    <motion.div variants={cardItemVariants} className="h-full w-full">
+                      {/* Ongoing slot-position cycling */}
+                      <motion.div
+                        animate={{ rotate: slot.rotate, x: slot.x, y: slot.y }}
+                        transition={{ duration: 0.6, ease: "easeInOut" }}
+                        className="h-full w-full"
+                      >
+                        <motion.div
+                          whileHover={{ y: -10, transition: { duration: 0.3 } }}
+                          className="relative h-full w-full overflow-hidden rounded-2xl shadow-2xl"
+                        >
+                          <Image
+                            src={photo.src}
+                            alt={photo.alt}
+                            fill
+                            className="object-cover"
+                            priority={photo.src === "/hero-keyring-2.png"}
+                          />
+                        </motion.div>
+                      </motion.div>
+                    </motion.div>
+                  </DialogTrigger>
+                  <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+                    <DialogHeader>
+                      <DialogTitle className="sr-only">{photo.alt}</DialogTitle>
+                    </DialogHeader>
+                    <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl">
+                      <Image
+                        src={photo.src}
+                        alt={photo.alt}
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              );
+            })}
           </div>
         </motion.div>
       </motion.div>
