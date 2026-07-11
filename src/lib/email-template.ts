@@ -53,12 +53,12 @@ function itemRow(item: EmailOrderItem, index: number): string {
 
   return `
     <tr>
-      <td style="padding:10px 12px;border-bottom:1px solid #F0EBE3;">${index + 1}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #F0EBE3;font-weight:600;">${item.letters.trim()}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #F0EBE3;">${capitalize(escapeHtml(item.stringColor))}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #F0EBE3;">${item.freeAccessories.length ? item.freeAccessories.join(", ") : "—"}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #F0EBE3;">${extras.length ? extras.join(", ") : "—"}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #F0EBE3;text-align:right;">${formatPrice(calculateItemTotal(orderItem))}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${index + 1}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;font-weight:600;">${item.letters.trim()}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${capitalize(escapeHtml(item.stringColor))}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${item.freeAccessories.length ? item.freeAccessories.join(", ") : "—"}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${extras.length ? extras.join(", ") : "—"}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;text-align:right;">${formatPrice(calculateItemTotal(orderItem))}</td>
     </tr>
   `;
 }
@@ -73,13 +73,13 @@ function orderTable(items: EmailOrderItem[]): string {
     <!-- Order table -->
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:0.88rem;">
       <thead>
-        <tr style="background:#F5F0E8;">
-          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#6B5040;">#</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#6B5040;">Letters</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#6B5040;">String</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#6B5040;">Free Accessories</th>
-          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#6B5040;">Extras</th>
-          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#6B5040;">Price</th>
+        <tr style="background:#FED1D3;">
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#737373;">#</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#737373;">Letters</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#737373;">String</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#737373;">Free Accessories</th>
+          <th style="padding:10px 12px;text-align:left;font-weight:700;color:#737373;">Extras</th>
+          <th style="padding:10px 12px;text-align:right;font-weight:700;color:#737373;">Price</th>
         </tr>
       </thead>
       <tbody>
@@ -90,14 +90,14 @@ function orderTable(items: EmailOrderItem[]): string {
     <!-- Totals -->
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:0.88rem;margin-top:4px;">
       <tr>
-        <td style="padding:8px 12px;color:#6B5040;">Subtotal</td>
+        <td style="padding:8px 12px;color:#737373;">Subtotal</td>
         <td style="padding:8px 12px;text-align:right;">${formatPrice(subtotal)}</td>
       </tr>
       <tr>
-        <td style="padding:8px 12px;color:#6B5040;">Shipping</td>
+        <td style="padding:8px 12px;color:#737373;">Shipping</td>
         <td style="padding:8px 12px;text-align:right;">${shipping === 0 ? "Free" : formatPrice(shipping)}</td>
       </tr>
-      <tr style="background:#F5F0E8;font-weight:700;">
+      <tr style="background:#FED1D3;font-weight:700;">
         <td style="padding:10px 12px;border-radius:0 0 0 8px;">Total (AUD)</td>
         <td style="padding:10px 12px;text-align:right;border-radius:0 0 8px 0;">${formatPrice(total)}</td>
       </tr>
@@ -111,20 +111,20 @@ function deliveryBox(ctx: EmailContext): string {
   const safeAddress = escapeHtml(ctx.deliveryAddress);
 
   const phoneRow = safePhone
-    ? `<tr><td style="padding:3px 0;color:#6B5040;width:80px;">Phone</td><td style="padding:3px 0;">${safePhone}</td></tr>`
+    ? `<tr><td style="padding:3px 0;color:#737373;width:80px;">Phone</td><td style="padding:3px 0;">${safePhone}</td></tr>`
     : "";
 
   return `
     <!-- Delivery Details -->
     <table width="100%" cellpadding="0" cellspacing="0"
-      style="border-collapse:collapse;font-size:0.88rem;margin-top:20px;background:#FAF6EF;border-radius:8px;padding:0;">
+      style="border-collapse:collapse;font-size:0.88rem;margin-top:20px;background:#FED1D3;border-radius:8px;padding:0;">
       <tr>
         <td style="padding:14px 16px;">
-          <p style="margin:0 0 8px;font-weight:700;color:#2C1A0E;font-size:0.9rem;">Delivery Details</p>
+          <p style="margin:0 0 8px;font-weight:700;color:#1B1B1B;font-size:0.9rem;">Delivery Details</p>
           <table cellpadding="0" cellspacing="0" style="border-collapse:collapse;font-size:0.88rem;">
-            <tr><td style="padding:3px 0;color:#6B5040;width:80px;">Name</td><td style="padding:3px 0;">${safeName}</td></tr>
+            <tr><td style="padding:3px 0;color:#737373;width:80px;">Name</td><td style="padding:3px 0;">${safeName}</td></tr>
             ${phoneRow}
-            <tr><td style="padding:3px 0;color:#6B5040;width:80px;">Address</td><td style="padding:3px 0;">${safeAddress}</td></tr>
+            <tr><td style="padding:3px 0;color:#737373;width:80px;">Address</td><td style="padding:3px 0;">${safeAddress}</td></tr>
           </table>
         </td>
       </tr>
@@ -140,7 +140,7 @@ const HTML_SHELL = (title: string, headerText: string, body: string) => `
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title}</title>
 </head>
-<body style="margin:0;padding:0;background:#F5F0E8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#2C1A0E;">
+<body style="margin:0;padding:0;background:#FFDDDB;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1B1B1B;">
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
     <tr>
       <td align="center">
@@ -148,9 +148,9 @@ const HTML_SHELL = (title: string, headerText: string, body: string) => `
 
           <!-- Header -->
           <tr>
-            <td style="background:#F5C842;border-radius:16px 16px 0 0;padding:28px 32px;">
-              <p style="margin:0;font-size:1.4rem;font-weight:800;color:#2C1A0E;">🎁 Delight &amp; Co</p>
-              <p style="margin:6px 0 0;font-size:1rem;font-weight:600;color:#2C1A0E;">${headerText}</p>
+            <td style="background:#FC7A73;border-radius:16px 16px 0 0;padding:28px 32px;">
+              <p style="margin:0;font-size:1.4rem;font-weight:800;color:#1B1B1B;">🎁 Delight &amp; Co</p>
+              <p style="margin:6px 0 0;font-size:1rem;font-weight:600;color:#1B1B1B;">${headerText}</p>
             </td>
           </tr>
 
@@ -163,8 +163,8 @@ const HTML_SHELL = (title: string, headerText: string, body: string) => `
 
           <!-- Footer -->
           <tr>
-            <td style="background:#F5F0E8;border-radius:0 0 16px 16px;padding:16px 32px;text-align:center;">
-              <p style="margin:0;font-size:0.78rem;color:#8A7060;">
+            <td style="background:#FFDDDB;border-radius:0 0 16px 16px;padding:16px 32px;text-align:center;">
+              <p style="margin:0;font-size:0.78rem;color:#737373;">
                 Delight &amp; Co · Handmade with love 🎀
               </p>
             </td>
@@ -189,9 +189,9 @@ export function buildOrderConfirmationEmail(ctx: EmailContext): string {
 
     ${deliveryBox(ctx)}
 
-    <p style="margin:24px 0 0;font-size:0.85rem;color:#6B5040;line-height:1.6;">
+    <p style="margin:24px 0 0;font-size:0.85rem;color:#737373;line-height:1.6;">
       We'll send you a separate email once your order ships.<br/>
-      Questions? Reach us at <a href="mailto:hello@delightandco.com.au" style="color:#C4614A;">hello@delightandco.com.au</a>
+      Questions? Reach us at <a href="mailto:hello@delightandco.com.au" style="color:#BD413F;">hello@delightandco.com.au</a>
     </p>
   `;
 
@@ -229,17 +229,17 @@ export function buildOwnerNotificationEmail(order: {
   const summaryBox = `
     <!-- New Order Summary -->
     <table width="100%" cellpadding="0" cellspacing="0"
-      style="border-collapse:collapse;font-size:0.88rem;margin-bottom:24px;background:#FFF8E7;border-radius:8px;border:2px solid #F5C842;">
+      style="border-collapse:collapse;font-size:0.88rem;margin-bottom:24px;background:#FED1D3;border-radius:8px;border:2px solid #FC7A73;">
       <tr>
         <td style="padding:16px 20px;">
-          <p style="margin:0 0 10px;font-weight:800;font-size:1rem;color:#2C1A0E;">New Order</p>
-          <p style="margin:0 0 4px;color:#2C1A0E;">
+          <p style="margin:0 0 10px;font-weight:800;font-size:1rem;color:#1B1B1B;">New Order</p>
+          <p style="margin:0 0 4px;color:#1B1B1B;">
             <strong>Name:</strong> ${safeName}
             &nbsp;&nbsp;|&nbsp;&nbsp;
-            <strong>Email:</strong> <a href="mailto:${safeEmail}" style="color:#C4614A;">${safeEmail}</a>
+            <strong>Email:</strong> <a href="mailto:${safeEmail}" style="color:#BD413F;">${safeEmail}</a>
             ${safePhone ? `&nbsp;&nbsp;|&nbsp;&nbsp;<strong>Phone:</strong> ${safePhone}` : ""}
           </p>
-          <p style="margin:0;color:#2C1A0E;">
+          <p style="margin:0;color:#1B1B1B;">
             <strong>Address:</strong> ${safeAddress}
             &nbsp;&nbsp;|&nbsp;&nbsp;
             <strong>Items:</strong> ${order.items.length}

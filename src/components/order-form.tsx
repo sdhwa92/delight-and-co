@@ -76,7 +76,7 @@ function IncludedFreePanel() {
     <div
       className="mb-8 rounded-2xl p-5"
       style={{
-        backgroundColor: "var(--brand-yellow)",
+        backgroundColor: "var(--brand-pink)",
         color: "var(--brand-brown)",
       }}
     >
@@ -328,7 +328,7 @@ export function OrderSummary({ items }: { items: OrderFormValues["items"] }) {
     <div
       className="mt-8 rounded-2xl p-5"
       style={{
-        backgroundColor: "var(--brand-yellow)",
+        backgroundColor: "var(--brand-pink)",
         color: "var(--brand-brown)",
       }}
     >
@@ -471,7 +471,6 @@ export function OrderForm() {
 
   return (
     <section
-      id="order"
       ref={sectionRef}
       className="py-20"
       style={{ backgroundColor: "var(--brand-cream)" }}
@@ -513,11 +512,7 @@ export function OrderForm() {
                 <button
                   type="button"
                   onClick={() => append(createItem())}
-                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-full border-2 border-dashed py-3 text-base font-bold transition-colors hover:bg-white/60"
-                  style={{
-                    borderColor: "var(--brand-green)",
-                    color: "var(--brand-green)",
-                  }}
+                  className="mt-4 flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-dashed border-[var(--brand-coral)] bg-transparent py-3 text-lg font-bold text-[var(--brand-coral)] transition-colors hover:border-solid hover:bg-[var(--brand-coral)] hover:text-white"
                 >
                   <Plus size={18} />
                   Add another keyring
@@ -527,7 +522,7 @@ export function OrderForm() {
                   type="button"
                   onClick={() => goToStep(2)}
                   size="lg"
-                  className="mt-6 w-full rounded-full text-lg font-bold text-white"
+                  className="mt-6 h-auto w-full cursor-pointer rounded-full py-3 text-lg font-bold text-white transition-all hover:scale-105 active:scale-95"
                   style={{ backgroundColor: "var(--brand-coral)" }}
                 >
                   Continue →
@@ -549,7 +544,7 @@ export function OrderForm() {
                     onClick={methods.handleSubmit(handleSubmit)}
                     disabled={submitting}
                     size="lg"
-                    className="w-full rounded-full text-lg font-bold text-white disabled:opacity-60"
+                    className="h-auto w-full cursor-pointer rounded-full py-3 text-lg font-bold text-white transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
                     style={{ backgroundColor: "var(--brand-coral)" }}
                   >
                     {submitting
@@ -559,8 +554,8 @@ export function OrderForm() {
                   <button
                     type="button"
                     onClick={() => goToStep(1)}
-                    className="text-sm font-semibold underline"
-                    style={{ color: "var(--brand-brown)", opacity: 0.6 }}
+                    className="w-full cursor-pointer rounded-full py-3 text-lg font-bold transition-all hover:scale-105 active:scale-95"
+                    style={{ backgroundColor: "var(--brand-gray)", color: "var(--brand-brown)" }}
                   >
                     ← Back
                   </button>

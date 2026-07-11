@@ -1,12 +1,14 @@
 import { HeroSection } from "@/components/hero-section";
-import { OrderForm } from "@/components/order-form";
+import { BrandStorySection } from "@/components/brand-story-section";
+import { CharmsSection } from "@/components/charms-section";
 import { TestimonialsSection } from "@/components/testimonials-section";
 
 export default function Home() {
   return (
     <>
       <HeroSection />
-      <OrderForm />
+      <BrandStorySection />
+      <CharmsSection />
       <TestimonialsSection />
     </>
   );

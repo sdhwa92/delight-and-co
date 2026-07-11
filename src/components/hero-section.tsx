@@ -1,11 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
     <section
       id="home"
       className="relative overflow-hidden"
-      style={{ backgroundColor: "var(--brand-yellow)" }}
+      style={{ backgroundColor: "var(--brand-pink)" }}
     >
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-4 py-20 md:flex-row md:gap-16 md:py-28">
         {/* Left: text */}
@@ -23,13 +24,13 @@ export function HeroSection() {
             your string color, and carry a little piece of joy everywhere you
             go.
           </p>
-          <a
-            href="#order"
-            className="inline-block rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
+          <Link
+            href="/order"
+            className="inline-block cursor-pointer rounded-full px-8 py-3 text-lg font-bold text-white shadow-lg transition-transform hover:scale-105 active:scale-95"
             style={{ backgroundColor: "var(--brand-coral)" }}
           >
             Order Yours →
-          </a>
+          </Link>
         </div>
 
         {/* Right: product image */}

@@ -1,6 +1,6 @@
-import { Star } from "lucide-react";
+import { TestimonialsColumn, type Testimonial } from "@/components/ui/testimonials-columns-1";
 
-const TESTIMONIALS = [
+const TESTIMONIALS: Testimonial[] = [
   {
     name: "Sarah M.",
     rating: 5,
@@ -19,21 +19,47 @@ const TESTIMONIALS = [
     text: "Beautifully handmade and the pastel string colors are so pretty. The mint string is my favorite. Packaging was super cute too!",
     item: "Keyring: PRIYA, string: Mint",
   },
+  {
+    name: "Emily R.",
+    rating: 5,
+    text: "Ordered a set as bridesmaid gifts and they turned out even better than I imagined. So much love went into each one!",
+    item: "Keyring: EMILY, string: Lavender",
+  },
+  {
+    name: "Grace L.",
+    rating: 5,
+    text: "My son carries his keyring everywhere and shows it off to everyone. The letters are so sturdy and well made.",
+    item: "Keyring: NOAH",
+  },
+  {
+    name: "Aisha B.",
+    rating: 5,
+    text: "The attention to detail is incredible. You can really tell these are handmade with care, not mass produced.",
+    item: "Keyring: AISHA, string: Blue",
+  },
+  {
+    name: "Chloe W.",
+    rating: 5,
+    text: "Bought one for myself and ended up ordering three more for friends. The present box option made gifting so easy!",
+    item: "Keyring: CHLOE, Present Box",
+  },
+  {
+    name: "Megan P.",
+    rating: 5,
+    text: "Fast shipping and the cutest packaging. My daughter hasn't taken hers off her backpack since it arrived.",
+    item: "Keyring: MEG",
+  },
+  {
+    name: "Fatima H.",
+    rating: 5,
+    text: "Such a thoughtful, personal gift. The extra character parts made it even more special for my niece.",
+    item: "Keyring: FATIMA, Extra Parts",
+  },
 ] as const;
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-0.5">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={i < rating ? "fill-[var(--brand-coral)] text-[var(--brand-coral)]" : "text-gray-200"}
-        />
-      ))}
-    </div>
-  );
-}
+const firstColumn = TESTIMONIALS.slice(0, 3);
+const secondColumn = TESTIMONIALS.slice(3, 6);
+const thirdColumn = TESTIMONIALS.slice(6, 9);
 
 export function TestimonialsSection() {
   return (
@@ -46,26 +72,18 @@ export function TestimonialsSection() {
           What Our Customers Say 💬
         </h2>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {TESTIMONIALS.map((t) => (
-            <div
-              key={t.name}
-              className="flex flex-col gap-3 rounded-2xl bg-white p-6 shadow-sm"
-            >
-              <StarRating rating={t.rating} />
-              <p className="text-base leading-relaxed" style={{ color: "var(--brand-brown)" }}>
-                "{t.text}"
-              </p>
-              <div className="mt-auto pt-2">
-                <p className="text-base font-bold" style={{ color: "var(--brand-brown)" }}>
-                  {t.name}
-                </p>
-                <p className="text-sm" style={{ color: "var(--brand-green)" }}>
-                  {t.item}
-                </p>
-              </div>
-            </div>
-          ))}
+        <div className="flex max-h-[720px] justify-center gap-6 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_15%,black_85%,transparent)]">
+          <TestimonialsColumn testimonials={firstColumn} duration={15} className="w-full max-w-sm" />
+          <TestimonialsColumn
+            testimonials={secondColumn}
+            duration={19}
+            className="hidden w-full max-w-sm sm:block"
+          />
+          <TestimonialsColumn
+            testimonials={thirdColumn}
+            duration={17}
+            className="hidden w-full max-w-sm lg:block"
+          />
         </div>
       </div>
     </section>
