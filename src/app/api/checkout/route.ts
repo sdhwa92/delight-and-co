@@ -12,7 +12,7 @@ import {
 
 const CURRENCY = "aud";
 
-const FREE_ACCESSORY_KEYS = ["Silicon tie", "4 Beads", "2 Character parts"] as const;
+const FREE_ACCESSORY_KEYS = ["Silicon tie", "4 Beads", "2 Charms"] as const;
 
 interface CheckoutItem {
   letters: unknown;
@@ -36,13 +36,13 @@ function sanitizeItem(raw: CheckoutItem): OrderItem | null {
 function describeItem(item: OrderItem): string {
   const extras: string[] = [];
   if (item.presentBox) extras.push("Present Box");
-  if (item.extraCharacterParts) extras.push("Extra Character Parts ×2");
+  if (item.extraCharacterParts) extras.push("Extra Charms ×2");
   const suffix = extras.length ? ` (${extras.join(", ")})` : "";
   return `Custom Keyring — ${item.letters.trim()}${suffix}`;
 }
 
 // Encodes freeAccessories per item as compact pipe-separated 3-bit strings.
-// e.g. two items: "110|011" — bits = [Silicon tie, 4 Beads, 2 Character parts]
+// e.g. two items: "110|011" — bits = [Silicon tie, 4 Beads, 2 Charms]
 function encodeFreeAccessories(rawItems: CheckoutItem[]): string {
   return rawItems
     .map((it) => {

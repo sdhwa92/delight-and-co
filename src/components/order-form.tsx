@@ -50,13 +50,13 @@ const INCLUDED_FREE = [
   "O-ring key chain",
   "Silicon tie",
   "4 Beads",
-  "2 Character parts",
+  "2 Charms",
 ] as const;
 
 const OPTIONAL_FREE_ACCESSORIES = [
   "Silicon tie",
   "4 Beads",
-  "2 Character parts",
+  "2 Charms",
 ] as const;
 
 const STEP_LABELS = ["Keyring", "Review"];
@@ -293,7 +293,7 @@ function KeyringCard({
             suppressHydrationWarning
           />
           <span style={{ color: "var(--brand-brown)" }}>
-            Additional Character Parts ×2{" "}
+            Extra Charms ×2{" "}
             <span className="text-[var(--brand-coral)]">
               +{formatPrice(EXTRA_PARTS_PRICE)}
             </span>
@@ -339,7 +339,7 @@ export function OrderSummary({ items }: { items: OrderFormValues["items"] }) {
             item.stringColor;
           const extraDetails: string[] = [];
           if (item.presentBox) extraDetails.push("Present Box");
-          if (item.extraCharacterParts) extraDetails.push("Extra Parts ×2");
+          if (item.extraCharacterParts) extraDetails.push("Extra Charms ×2");
           const allFreeAccessories = [
             "O-ring key chain",
             ...(item.freeAccessories ?? []),

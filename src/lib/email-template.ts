@@ -5,6 +5,7 @@ import {
   formatPrice,
   type OrderItem,
 } from "@/lib/pricing";
+import { formatOrderReference } from "@/lib/order-reference";
 
 export interface EmailOrderItem {
   letters: string;
@@ -15,6 +16,7 @@ export interface EmailOrderItem {
 }
 
 export interface EmailContext {
+  orderId: string;
   items: EmailOrderItem[];
   customerName: string;
   customerPhone?: string;
@@ -49,14 +51,18 @@ function itemRow(item: EmailOrderItem, index: number): string {
 
   const extras: string[] = [];
   if (item.presentBox) extras.push("Present Box");
-  if (item.extraCharacterParts) extras.push("Extra Character Parts ×2");
+  if (item.extraCharacterParts) extras.push("Extra Charms ×2");
+
+  // O-ring key chain is included with every keyring but isn't a toggleable
+  // free accessory, so it's never part of item.freeAccessories — list it first.
+  const freeAccessories = ["O-ring key chain", ...item.freeAccessories];
 
   return `
     <tr>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${index + 1}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;font-weight:600;">${item.letters.trim()}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${capitalize(escapeHtml(item.stringColor))}</td>
-      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${item.freeAccessories.length ? item.freeAccessories.join(", ") : "—"}</td>
+      <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${freeAccessories.join(", ")}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;">${extras.length ? extras.join(", ") : "—"}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E5E5;text-align:right;">${formatPrice(calculateItemTotal(orderItem))}</td>
     </tr>
@@ -180,9 +186,12 @@ const HTML_SHELL = (title: string, headerText: string, body: string) => `
 
 export function buildOrderConfirmationEmail(ctx: EmailContext): string {
   const body = `
-    <p style="margin:0 0 20px;font-size:0.95rem;line-height:1.6;">
+    <p style="margin:0 0 8px;font-size:0.95rem;line-height:1.6;">
       Hi ${escapeHtml(ctx.customerName)}! Your order is confirmed 🎉<br/>
       We'll handcraft your custom keyrings with care and love 🌸
+    </p>
+    <p style="margin:0 0 20px;font-size:0.8rem;color:#737373;">
+      Order reference: ${formatOrderReference(ctx.orderId)}
     </p>
 
     ${orderTable(ctx.items)}
@@ -199,6 +208,7 @@ export function buildOrderConfirmationEmail(ctx: EmailContext): string {
 }
 
 export function buildOwnerNotificationEmail(order: {
+  order_id: string;
   customer_name: string;
   customer_email: string;
   customer_phone?: string;
@@ -207,6 +217,7 @@ export function buildOwnerNotificationEmail(order: {
   total_cents?: number;
 }): string {
   const ctx: EmailContext = {
+    orderId: order.order_id,
     items: order.items,
     customerName: order.customer_name,
     customerPhone: order.customer_phone,
@@ -232,7 +243,10 @@ export function buildOwnerNotificationEmail(order: {
       style="border-collapse:collapse;font-size:0.88rem;margin-bottom:24px;background:#FED1D3;border-radius:8px;border:2px solid #FC7A73;">
       <tr>
         <td style="padding:16px 20px;">
-          <p style="margin:0 0 10px;font-weight:800;font-size:1rem;color:#1B1B1B;">New Order</p>
+          <p style="margin:0 0 10px;font-weight:800;font-size:1rem;color:#1B1B1B;">
+            New Order
+            <span style="font-weight:600;font-size:0.85rem;color:#737373;">&nbsp;&nbsp;·&nbsp;&nbsp;${formatOrderReference(order.order_id)}</span>
+          </p>
           <p style="margin:0 0 4px;color:#1B1B1B;">
             <strong>Name:</strong> ${safeName}
             &nbsp;&nbsp;|&nbsp;&nbsp;

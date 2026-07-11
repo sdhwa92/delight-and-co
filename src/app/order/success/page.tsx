@@ -7,6 +7,7 @@ import {
   calculateSubtotal,
   calculateShipping,
 } from "@/lib/pricing";
+import { formatOrderReference } from "@/lib/order-reference";
 
 interface OrderItem {
   letters: string;
@@ -108,12 +109,12 @@ export default async function OrderSuccessPage({
           </div>
         )}
 
-        {session_id && (
+        {session?.client_reference_id && (
           <p
             className="mt-4 text-sm"
             style={{ color: "var(--brand-brown)", opacity: 0.5 }}
           >
-            Order reference: {session_id}
+            Order reference: {formatOrderReference(session.client_reference_id)}
           </p>
         )}
         <Link
