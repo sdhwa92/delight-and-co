@@ -49,8 +49,8 @@
 }
 
 :root {
-  --background: oklch(0.98 0.01 90);   /* warm cream */
-  --foreground: oklch(0.28 0.05 50);   /* dark brown */
+  --background: oklch(0.93 0.045 20);  /* blush pink (reference hero bg) */
+  --foreground: oklch(0.22 0 0);       /* near-black charcoal (reference body text) */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -82,15 +82,13 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* Delight & Co brand */
-  --brand-yellow: oklch(0.88 0.13 88);        /* warm golden yellow — new primary */
-  --brand-green: oklch(0.72 0.14 158);        /* candy mint — accent */
-  --brand-brown: oklch(0.30 0.06 50);         /* dark brown — text on yellow */
-  --brand-cream: oklch(0.99 0.015 85);        /* warm cream — page background */
-  --brand-coral: oklch(0.70 0.19 28);         /* vivid coral — CTA */
-  --brand-pink: oklch(0.85 0.10 355);         /* bubblegum pink — accent */
-  --brand-mint: oklch(0.86 0.10 168);         /* saturated mint — accent */
-  --brand-lavender: oklch(0.84 0.09 295);     /* soft lavender — accent */
+  /* Delight & Co brand — restricted to colors present in the reference screenshot */
+  --brand-gray: oklch(0.94 0 0);               /* light neutral gray — contact-style section bg */
+  --brand-green: oklch(0.73 0.16 25);          /* aliased to coral — reference has no green */
+  --brand-brown: oklch(0.22 0 0);              /* near-black charcoal — text on coral/pink (kept var name for compat) */
+  --brand-cream: oklch(1 0 0);                 /* white — alternating section background */
+  --brand-coral: oklch(0.73 0.16 25);          /* salmon/coral — CTA section + accent */
+  --brand-pink: oklch(0.90 0.05 15);           /* light pink — card panels inside coral section */
 }
 
 .dark {

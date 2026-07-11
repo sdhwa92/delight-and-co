@@ -45,3 +45,5 @@ next-env.d.ts
 
 # plans
 docs/plans
+*storybook.log
+storybook-static
