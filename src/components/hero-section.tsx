@@ -65,7 +65,7 @@ const SLOTS = [
   { rotate: 10, x: "42%", y: "-6%", z: 10 },
 ] as const;
 
-const ROTATE_INTERVAL_MS = 5000;
+const ROTATE_INTERVAL_MS = 3000;
 
 function useCyclingOffset(count: number, intervalMs: number, paused: boolean) {
   const [offset, setOffset] = useState(0);
