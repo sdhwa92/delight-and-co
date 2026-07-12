@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       // Fix 2: wrap fulfillment in try/catch — return 200 on failure so Stripe won't retry
       try {
         // Upsert order record in Supabase
+        const paidAt = new Date().toISOString();
         let order: { confirmed_at?: string | null } | null = null;
         if (orderId) {
           const { data: upsertedOrder, error: upsertError } = await supabase
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
                 customer_email: customerEmail ?? "",
                 customer_phone: customerPhone ?? null,
                 delivery_address: deliveryAddress,
-                paid_at: new Date().toISOString(),
+                paid_at: paidAt,
                 // Required for INSERT path (race condition: webhook arrives before checkout INSERT)
                 subtotal_cents: Number(meta.subtotalCents ?? 0),
                 shipping_cents: Number(meta.shippingCents ?? 0),
@@ -153,6 +154,7 @@ export async function POST(req: NextRequest) {
           customerName,
           customerPhone,
           deliveryAddress,
+          paidAt,
         };
 
         const { data: customerEmailData, error: customerEmailError } =
@@ -193,6 +195,7 @@ export async function POST(req: NextRequest) {
                 delivery_address: deliveryAddress,
                 items: emailItems,
                 total_cents: totalCents,
+                paid_at: paidAt,
               }),
             });
           if (ownerEmailError) {
