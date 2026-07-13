@@ -230,7 +230,7 @@ export function buildOrderConfirmationEmail(ctx: EmailContext): string {
 
   return HTML_SHELL(
     "Your Delight &amp; Co Order Receipt",
-    "Your order is confirmed! (This email is your receipt)",
+    "Your order is confirmed!",
     body,
   );
 }
