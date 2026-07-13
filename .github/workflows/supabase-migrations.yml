@@ -2,13 +2,15 @@ name: Supabase Migrations
 
 on:
   push:
-    branches: [main]
+    branches: [main, dev]
     paths:
-      - 'supabase/migrations/**'
+      - "supabase/migrations/**"
+  workflow_dispatch:
 
 jobs:
   migrate:
     runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'Production' || 'Preview' }}
     steps:
       - uses: actions/checkout@v4
 

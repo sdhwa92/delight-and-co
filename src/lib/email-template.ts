@@ -7,6 +7,17 @@ import {
 } from "@/lib/pricing";
 import { formatOrderReference } from "@/lib/order-reference";
 
+const BUSINESS_NAME = "Delight & Co";
+const BUSINESS_ABN = "49 839 776 650";
+
+function formatPaidDate(paidAt: string): string {
+  return new Date(paidAt).toLocaleDateString("en-AU", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export interface EmailOrderItem {
   letters: string;
   stringColor: string;
@@ -21,6 +32,7 @@ export interface EmailContext {
   customerName: string;
   customerPhone?: string;
   deliveryAddress: string;
+  paidAt: string;
 }
 
 /** Convert an EmailOrderItem to the OrderItem shape pricing functions expect. */
@@ -111,6 +123,19 @@ function orderTable(items: EmailOrderItem[]): string {
   `;
 }
 
+function receiptBox(ctx: EmailContext): string {
+  return `
+    <!-- Receipt Details -->
+    <table width="100%" cellpadding="0" cellspacing="0"
+      style="border-collapse:collapse;font-size:0.85rem;margin-bottom:16px;color:#737373;">
+      <tr><td style="padding:2px 0;">Receipt for order <strong style="color:#1B1B1B;">${formatOrderReference(ctx.orderId)}</strong></td></tr>
+      <tr><td style="padding:2px 0;">Date paid: ${formatPaidDate(ctx.paidAt)}</td></tr>
+      <tr><td style="padding:2px 0;">Seller: ${BUSINESS_NAME} · ABN ${BUSINESS_ABN}</td></tr>
+      <tr><td style="padding:2px 0;">Payment status: <strong style="color:#1B1B1B;">Paid</strong></td></tr>
+    </table>
+  `;
+}
+
 function deliveryBox(ctx: EmailContext): string {
   const safeName = escapeHtml(ctx.customerName);
   const safePhone = ctx.customerPhone ? escapeHtml(ctx.customerPhone) : null;
@@ -171,7 +196,7 @@ const HTML_SHELL = (title: string, headerText: string, body: string) => `
           <tr>
             <td style="background:#FFDDDB;border-radius:0 0 16px 16px;padding:16px 32px;text-align:center;">
               <p style="margin:0;font-size:0.78rem;color:#737373;">
-                Delight &amp; Co · Handmade with love 🎀
+                Delight &amp; Co · ABN ${BUSINESS_ABN} · Handmade with love 🎀
               </p>
             </td>
           </tr>
@@ -186,13 +211,12 @@ const HTML_SHELL = (title: string, headerText: string, body: string) => `
 
 export function buildOrderConfirmationEmail(ctx: EmailContext): string {
   const body = `
-    <p style="margin:0 0 8px;font-size:0.95rem;line-height:1.6;">
+    <p style="margin:0 0 16px;font-size:0.95rem;line-height:1.6;">
       Hi ${escapeHtml(ctx.customerName)}! Your order is confirmed 🎉<br/>
       We'll handcraft your custom keyrings with care and love 🌸
     </p>
-    <p style="margin:0 0 20px;font-size:0.8rem;color:#737373;">
-      Order reference: ${formatOrderReference(ctx.orderId)}
-    </p>
+
+    ${receiptBox(ctx)}
 
     ${orderTable(ctx.items)}
 
@@ -204,7 +228,11 @@ export function buildOrderConfirmationEmail(ctx: EmailContext): string {
     </p>
   `;
 
-  return HTML_SHELL("Your Delight &amp; Co Order", "Your order is confirmed!", body);
+  return HTML_SHELL(
+    "Your Delight &amp; Co Order Receipt",
+    "Your order is confirmed! (This email is your receipt)",
+    body,
+  );
 }
 
 export function buildOwnerNotificationEmail(order: {
@@ -215,6 +243,7 @@ export function buildOwnerNotificationEmail(order: {
   delivery_address: string;
   items: EmailOrderItem[];
   total_cents?: number;
+  paid_at?: string;
 }): string {
   const ctx: EmailContext = {
     orderId: order.order_id,
@@ -222,6 +251,7 @@ export function buildOwnerNotificationEmail(order: {
     customerName: order.customer_name,
     customerPhone: order.customer_phone,
     deliveryAddress: order.delivery_address,
+    paidAt: order.paid_at ?? new Date().toISOString(),
   };
 
   const safeName = escapeHtml(order.customer_name);
