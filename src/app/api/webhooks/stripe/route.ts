@@ -9,6 +9,8 @@ import {
   type EmailOrderItem,
 } from "@/lib/email-template";
 
+const SUBJECT_PREFIX = process.env.VERCEL_ENV === "production" ? "" : "[PREVIEW] ";
+
 const FREE_ACCESSORY_KEYS = [
   "Silicon tie",
   "4 Beads",
@@ -161,7 +163,7 @@ export async function POST(req: NextRequest) {
           await resend.emails.send({
             from: EMAIL_FROM,
             to: customerEmail,
-            subject: "🎁 Your Delight & Co order is confirmed!",
+            subject: `${SUBJECT_PREFIX}🎁 Your Delight & Co order is confirmed!`,
             html: buildOrderConfirmationEmail(ctx),
           });
         if (customerEmailError) {
@@ -186,7 +188,7 @@ export async function POST(req: NextRequest) {
             await resend.emails.send({
               from: EMAIL_FROM,
               to: process.env.OWNER_EMAIL,
-              subject: `New order from ${customerName || customerEmail}`,
+              subject: `${SUBJECT_PREFIX}New order from ${customerName || customerEmail}`,
               html: buildOwnerNotificationEmail({
                 order_id: orderId ?? "unknown",
                 customer_name: customerName,
