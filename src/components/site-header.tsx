@@ -8,7 +8,7 @@ import { Menu, X } from "lucide-react";
 const NAV_LINKS = [
   { href: "/#home", label: "Home" },
   { href: "/order", label: "Order" },
-  { href: "/#reviews", label: "Reviews" },
+  { href: "/#gallery", label: "Gallery" },
 ] as const;
 
 export function SiteHeader() {
