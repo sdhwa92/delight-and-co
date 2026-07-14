@@ -125,8 +125,6 @@ export function SiteFooter() {
             <InstagramIcon />
           </a>
 
-          <NewsletterForm />
-
           <a href={`mailto:${CONTACT_EMAIL}`} className="text-sm underline">
             {CONTACT_EMAIL}
           </a>
